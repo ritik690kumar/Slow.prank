@@ -23,7 +23,7 @@
         .app-view { display: none; padding: 15px; width: 100%; min-height: calc(100vh - 80px); animation: fadeIn 0.3s ease; }
         .app-view.active { display: block; }
 
-        /* ================= FLOATING BOTTOM NAV (4 TABS) ================= */
+        /* ================= FLOATING BOTTOM NAV ================= */
         .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 65px; background: rgba(11, 14, 32, 0.95); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-top: 1px solid var(--border-color); display: flex; justify-content: space-around; align-items: center; z-index: 1000; padding: 0 5px; }
         .nav-btn { flex: 1; border: none; background: transparent; font-size: 11px; font-weight: 700; color: var(--text-muted); cursor: pointer; transition: 0.3s; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 0; text-transform: uppercase; letter-spacing: 0.5px; }
         .nav-btn span { font-size: 18px; filter: grayscale(100%) opacity(0.5); transition: 0.3s; }
@@ -61,11 +61,9 @@
         .cell { cursor: pointer; transition: 0.2s; font-weight: 600; }
         .cell:active { transform: scale(0.95); border-radius: 8px; }
         
-        /* Bulk Select Styles */
         .cell.bulk-selected { outline: 3px solid var(--primary) !important; background-color: rgba(42, 100, 246, 0.3) !important; transform: scale(0.95); border-radius: 6px; z-index: 2; position: relative; }
         .bulk-action-panel { display: none; position: fixed; bottom: 75px; left: 50%; transform: translateX(-50%); z-index: 1500; background: var(--card-bg); border: 2px solid var(--primary); padding: 15px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); width: 90%; max-width: 350px; text-align: center; }
 
-        /* Chart & Pie Styles */
         .pie-container { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; margin-bottom: 25px; }
         .pie-chart { width: 130px; height: 130px; border-radius: 50%; border: 4px solid var(--card-bg); box-shadow: 0 0 15px rgba(0,0,0,0.3); background: conic-gradient(var(--border-color) 0% 100%); transition: background 0.5s ease; }
         .chart-bar-wrapper { display: flex; height: 24px; border-radius: 12px; overflow: hidden; background: var(--bg-color); width: 100%; border: 1px solid var(--border-color); }
@@ -124,8 +122,16 @@
         .item-delete { background: rgba(255,59,48,0.1); border: none; color: var(--danger); width: 34px; height: 34px; border-radius: 10px; cursor: pointer; flex-shrink: 0; transition: 0.2s; display: flex; align-items: center; justify-content: center; }
         .item-delete:active { transform: scale(0.9); background: var(--danger); color: #fff; }
 
-        /* Quick Notes Grid */
-        .notes-grid { display: grid; gap: 12px; grid-template-columns: 1fr; }
+        /* Quick Notes Visual Editor Grid */
+        .btn-tool { padding: 6px 10px; background: var(--bg-color); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 8px; cursor: pointer; font-size: 13px; transition: 0.2s; font-weight: bold; white-space: nowrap; }
+        .btn-tool:active { transform: scale(0.9); }
+        [contenteditable="true"]:empty:before { content: attr(placeholder); color: var(--text-muted); pointer-events: none; display: block; }
+        
+        /* Lists formatting inside notes */
+        #note-input ul, #note-input ol, .note-text ul, .note-text ol { margin: 5px 0 5px 25px; padding: 0; list-style-position: outside; }
+        #note-input li, .note-text li { margin-bottom: 4px; }
+
+        .notes-grid { display: grid; gap: 12px; grid-template-columns: 1fr; margin-top: 15px; }
         .note-card { background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; position: relative; }
         .note-text { font-size: 14px; color: var(--text-main); white-space: pre-wrap; line-height: 1.5; margin-right: 70px; word-wrap: break-word;}
         .note-date { font-size: 11px; color: var(--text-muted); margin-top: 10px; }
@@ -263,11 +269,28 @@
             <div class="list-container" id="todo-list-container"></div>
         </div>
         
+        <!-- VISUAL EDITOR NOTES SECTION -->
         <div class="card">
-            <div class="header-action" style="border-bottom: 1px solid var(--border-color); padding-bottom: 15px;"><h3 class="card-title" style="margin:0;">🗒️ Quick Notes</h3></div>
-            <div class="input-group" style="align-items: flex-start;">
-                <textarea id="note-input" placeholder="Type short notes, doubts or formulas..." rows="2" style="resize:vertical;"></textarea>
-                <button class="btn btn-add" id="note-add-btn" style="height: 50px;">Save</button>
+            <div class="header-action" style="border-bottom: 1px solid var(--border-color); padding-bottom: 15px;"><h3 class="card-title" style="margin:0;">🗒️ Quick Notes (Visual)</h3></div>
+            
+            <div style="display:flex; gap:6px; margin-bottom:10px; overflow-x:auto; padding-bottom:5px; flex-wrap: nowrap;">
+                <button class="btn-tool" onclick="document.execCommand('bold', false, null)"><b>B</b></button>
+                <button class="btn-tool" onclick="document.execCommand('italic', false, null)"><i>I</i></button>
+                <button class="btn-tool" onclick="document.execCommand('underline', false, null)"><u>U</u></button>
+                <button class="btn-tool" onclick="document.execCommand('strikeThrough', false, null)"><s>S</s></button>
+                <div style="min-width:1px; background:var(--border-color); margin:0 2px;"></div>
+                <button class="btn-tool" onclick="document.execCommand('insertUnorderedList', false, null)">• List</button>
+                <button class="btn-tool" onclick="document.execCommand('insertOrderedList', false, null)">1. List</button>
+                <div style="min-width:1px; background:var(--border-color); margin:0 2px;"></div>
+                <button class="btn-tool" onclick="document.execCommand('foreColor', false, '#ff3b30')" style="color:#ff3b30;">🔴</button>
+                <button class="btn-tool" onclick="document.execCommand('foreColor', false, '#00d084')" style="color:#00d084;">🟢</button>
+                <button class="btn-tool" onclick="document.execCommand('foreColor', false, '#2a64f6')" style="color:#2a64f6;">🔵</button>
+                <button class="btn-tool" onclick="document.execCommand('foreColor', false, '#ffffff')" style="color:#ffffff;">⚪</button>
+            </div>
+
+            <div class="input-group" style="align-items: flex-start; flex-direction:column; gap:10px;">
+                <div id="note-input" contenteditable="true" placeholder="Type notes here... (Use tools above for formatting)" style="width:100%; min-height:100px; padding:14px; border:1px solid var(--border-color); border-radius:12px; background:var(--bg-color); color:var(--text-main); font-size:15px; outline:none; overflow-wrap: break-word;"></div>
+                <button class="btn btn-add" id="note-add-btn" style="width:100%;">Save Note</button>
             </div>
             <div class="notes-grid" id="notes-list-container"></div>
         </div>
@@ -490,7 +513,7 @@
             updateUI();
         })();
 
-        // ================= APP 3: TO-DO & NOTES =================
+        // ================= APP 3: TO-DO & NOTES (VISUAL EDITOR) =================
         (function initTodo() {
             let todos = JSON.parse(localStorage.getItem('todo_data')) || [];
             const listContainer = document.getElementById('todo-list-container'), inputField = document.getElementById('todo-input'), addBtn = document.getElementById('todo-add-btn');
@@ -505,9 +528,46 @@
             let notes = JSON.parse(localStorage.getItem('quick_notes')) || []; let editingNoteIndex = -1; 
             const notesContainer = document.getElementById('notes-list-container'), noteInput = document.getElementById('note-input'), noteAddBtn = document.getElementById('note-add-btn');
             function renderNotes() { notesContainer.innerHTML = ''; if(notes.length === 0) { notesContainer.innerHTML = '<p style="text-align:center; color:var(--text-muted); font-size:13px;">No notes saved.</p>'; return; } notes.forEach((note, index) => { notesContainer.innerHTML += `<div class="note-card"><div class="note-text">${note.text}</div><div class="note-date">${note.date}</div><div class="note-actions"><button class="note-action-btn btn-edit-note" onclick="editNote(${index})">✏️</button><button class="note-action-btn btn-del-note" onclick="deleteNote(${index})">✖</button></div></div>`; }); }
-            noteAddBtn.onclick = () => { let text = noteInput.value.trim(); if(text) { let d = new Date(); let dateStr = `${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')} • ${d.getHours()}:${d.getMinutes().toString().padStart(2,'0')}`; if(editingNoteIndex > -1) { notes[editingNoteIndex].text = text; notes[editingNoteIndex].date = dateStr + " (Edited)"; editingNoteIndex = -1; noteAddBtn.innerText = 'Save'; } else { notes.unshift({ text: text, date: dateStr }); } noteInput.value = ''; localStorage.setItem('quick_notes', JSON.stringify(notes)); renderNotes(); } };
-            window.editNote = i => { noteInput.value = notes[i].text; editingNoteIndex = i; noteAddBtn.innerText = 'Update'; noteInput.focus(); window.scrollTo({ top: noteInput.offsetTop - 50, behavior: 'smooth' }); };
-            window.deleteNote = i => { if(confirm('Delete note?')) { if(editingNoteIndex === i) { editingNoteIndex = -1; noteAddBtn.innerText = 'Save'; noteInput.value = ''; } notes.splice(i, 1); localStorage.setItem('quick_notes', JSON.stringify(notes)); renderNotes(); } };
+            
+            noteAddBtn.onclick = () => { 
+                let text = noteInput.innerHTML.trim(); 
+                if(text && text !== '<br>') { 
+                    let d = new Date(); 
+                    let dateStr = `${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')} • ${d.getHours()}:${d.getMinutes().toString().padStart(2,'0')}`; 
+                    if(editingNoteIndex > -1) { 
+                        notes[editingNoteIndex].text = text; 
+                        notes[editingNoteIndex].date = dateStr + " (Edited)"; 
+                        editingNoteIndex = -1; 
+                        noteAddBtn.innerText = 'Save Note'; 
+                    } else { 
+                        notes.unshift({ text: text, date: dateStr }); 
+                    } 
+                    noteInput.innerHTML = ''; 
+                    localStorage.setItem('quick_notes', JSON.stringify(notes)); 
+                    renderNotes(); 
+                } 
+            };
+            
+            window.editNote = i => { 
+                noteInput.innerHTML = notes[i].text; 
+                editingNoteIndex = i; 
+                noteAddBtn.innerText = 'Update Note'; 
+                noteInput.focus(); 
+                window.scrollTo({ top: noteInput.offsetTop - 50, behavior: 'smooth' }); 
+            };
+            
+            window.deleteNote = i => { 
+                if(confirm('Delete note?')) { 
+                    if(editingNoteIndex === i) { 
+                        editingNoteIndex = -1; 
+                        noteAddBtn.innerText = 'Save Note'; 
+                        noteInput.innerHTML = ''; 
+                    } 
+                    notes.splice(i, 1); 
+                    localStorage.setItem('quick_notes', JSON.stringify(notes)); 
+                    renderNotes(); 
+                } 
+            };
             renderNotes();
         })();
 
@@ -586,7 +646,6 @@
 
             window.addSubtask = (i, val) => {
                 let data = JSON.parse(localStorage.getItem('syll_data'));
-                // Agar pichla data string array me hai, toh object me badlo
                 if (data[i].subs.length > 0 && typeof data[i].subs[0] === 'string') {
                     data[i].subs = data[i].subs.map(s => ({text: s, done: false}));
                 }
@@ -719,12 +778,10 @@
 
                 try {
                     loadBtn.innerText = "Loading...";
-                    // Adding a timestamp query to bust browser cache
                     const res = await fetch(`https://kvdb.io/${bucketId}/focusgrid_data?t=${Date.now()}`);
                     if (res.ok) {
                         const parsedData = await res.json();
                         
-                        // Storage data drop execution
                         localStorage.setItem('wpk_tags', parsedData.wpk_tags || '');
                         localStorage.setItem('wpk_schedule', parsedData.wpk_schedule || '');
                         localStorage.setItem('tt_data', parsedData.tt_data || '');
@@ -734,8 +791,6 @@
                         localStorage.setItem('syll_data', parsedData.syll_data || '[]');
                         
                         alert("✅ Data Cloud se load ho gaya! Naya data apply karne ke liye app automatic full restart ho raha hai.");
-                        
-                        // HARD FORCE RELOAD BYPASSING CACHE
                         window.location.href = window.location.href.split('#')[0];
                         window.location.reload();
                     } else { 
