@@ -6,108 +6,174 @@
     <meta name="theme-color" content="#0b0e20">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>FocusGrid Planner</title>
     <style>
-        /* ================= THEME & BASICS ================= */
+        /* ================= VIVID ACADEMY DARK THEME ================= */
         :root {
             --bg-color: #0b0e20; --card-bg: #151a30; --border-color: #2a3258; 
             --primary: #2a64f6; --danger: #ff3b30; --success: #00d084; 
             --text-main: #ffffff; --text-muted: #808aab;
         }
-        body { margin: 0; padding: 0; padding-bottom: 80px; font-family: system-ui, sans-serif; background: var(--bg-color); color: var(--text-main); -webkit-tap-highlight-color: transparent; }
+        
+        body { margin: 0; padding: 0; padding-bottom: 80px; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg-color); color: var(--text-main); -webkit-tap-highlight-color: transparent; }
         * { box-sizing: border-box; }
+        
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         .app-view { display: none; padding: 15px; width: 100%; min-height: calc(100vh - 80px); animation: fadeIn 0.3s ease; }
         .app-view.active { display: block; }
 
-        /* ================= BOTTOM NAV ================= */
-        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 65px; background: rgba(11, 14, 32, 0.95); backdrop-filter: blur(10px); border-top: 1px solid var(--border-color); display: flex; justify-content: space-around; align-items: center; z-index: 1000; padding: 0 5px; }
-        .nav-btn { flex: 1; border: none; background: transparent; font-size: 11px; font-weight: 700; color: var(--text-muted); cursor: pointer; transition: 0.3s; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 0; text-transform: uppercase; }
-        .nav-btn span { font-size: 18px; filter: grayscale(100%) opacity(0.5); }
+        /* ================= FLOATING BOTTOM NAV (4 TABS) ================= */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 65px; background: rgba(11, 14, 32, 0.95); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-top: 1px solid var(--border-color); display: flex; justify-content: space-around; align-items: center; z-index: 1000; padding: 0 5px; }
+        .nav-btn { flex: 1; border: none; background: transparent; font-size: 11px; font-weight: 700; color: var(--text-muted); cursor: pointer; transition: 0.3s; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 0; text-transform: uppercase; letter-spacing: 0.5px; }
+        .nav-btn span { font-size: 18px; filter: grayscale(100%) opacity(0.5); transition: 0.3s; }
         .nav-btn.active { color: var(--primary); }
         .nav-btn.active span { filter: grayscale(0%) opacity(1); }
+        .nav-btn:active { transform: scale(0.92); }
 
-        /* ================= COMPONENTS ================= */
+        /* ================= COMMON COMPONENT STYLES ================= */
         .card { background: var(--card-bg); border-radius: 16px; padding: 20px; border: 1px solid var(--border-color); margin-bottom: 20px; }
-        .card-title { margin: 0 0 15px 0; font-size: 1.1rem; font-weight: 800; text-transform: uppercase; }
-        .btn { padding: 12px 18px; border: none; border-radius: 10px; color: #fff; cursor: pointer; font-weight: 600; font-size: 14px; text-transform: uppercase; }
+        .card-title { margin: 0 0 15px 0; font-size: 1.1rem; font-weight: 800; color: var(--text-main); text-transform: uppercase; letter-spacing: 1px; }
+        .section-subtitle { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; font-weight: 700; border-bottom: 1px solid var(--border-color); padding-bottom: 5px; }
+        
+        .btn { padding: 12px 18px; border: none; border-radius: 10px; color: #fff; cursor: pointer; font-weight: 600; font-size: 14px; transition: transform 0.1s, opacity 0.2s; text-transform: uppercase; letter-spacing: 0.5px;}
+        .btn:active { transform: scale(0.95); opacity: 0.9; }
         .btn-reset { background: rgba(255,59,48,0.1); color: var(--danger); border: 1px solid rgba(255,59,48,0.3); }
         .btn-add { background: var(--primary); }
         .btn-save { background: var(--success); color: #000; width: 100%; margin-bottom: 10px; }
         .btn-clear { background: rgba(255,59,48,0.1); color: var(--danger); width: 100%; margin-bottom: 10px; border: 1px solid var(--danger); }
-        .header-action { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 8px;}
-        .input-group { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
-        .input-group input { flex: 1; padding: 14px; border: 1px solid var(--border-color); border-radius: 12px; font-size: 15px; background: var(--bg-color); color: var(--text-main); outline: none; }
-        
-        /* ================= PLANNER ================= */
-        table { width: 100%; border-collapse: collapse; min-width: 600px; text-align: center; }
-        .table-wrapper { overflow-x: auto; border-radius: 12px; border: 1px solid var(--border-color); }
-        th, td { border: 1px solid var(--border-color); padding: 8px 5px; height: 45px; font-size: 13px; }
-        th { background: var(--card-bg); position: sticky; top: 0; font-size: 11px; }
-        .cell { cursor: pointer; font-weight: 600; }
-        .cell.bulk-selected { outline: 3px solid var(--primary); background: rgba(42, 100, 246, 0.3); }
-        .bulk-action-panel { display: none; position: fixed; bottom: 75px; left: 50%; transform: translateX(-50%); z-index: 1500; background: var(--card-bg); border: 2px solid var(--primary); padding: 15px; border-radius: 16px; width: 90%; max-width: 350px; text-align: center; }
-        .tag-inputs { display: flex; gap: 10px; margin-bottom: 15px; }
-        .tag-inputs input[type="color"] { width: 45px; height: 45px; padding: 2px; }
-        .tag-item { padding: 6px 14px; border-radius: 20px; font-size: 12px; display: flex; align-items: center; gap: 8px; border: 1px solid var(--border-color); background: rgba(255,255,255,0.05); }
-        .tag-delete { cursor: pointer; color: var(--danger); background: none; border: none; font-weight: bold; }
+        .btn-close { background: var(--border-color); color: var(--text-main); width: 100%; }
 
-        /* ================= TIMER ================= */
+        .header-action { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 8px;}
+        
+        /* Input Groups */
+        .input-group { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .input-group input, .input-group textarea { flex: 1; padding: 14px 18px; border: 1px solid var(--border-color); border-radius: 12px; font-size: 15px; outline: none; background: var(--bg-color); color: var(--text-main); transition: 0.2s; font-family: inherit; }
+        .input-group input[type="date"] { flex: 0 1 auto; max-width: 140px; padding: 14px 10px; }
+        .input-group input:focus, .input-group textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(42, 100, 246, 0.2); }
+        .input-group button { padding: 0 20px; border-radius: 12px; }
+
+        /* ================= APP 1: PLANNER ================= */
+        .table-wrapper { width: 100%; overflow-x: auto; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-color); }
+        table { width: 100%; border-collapse: collapse; min-width: 600px; text-align: center; }
+        th, td { border: 1px solid var(--border-color); padding: 8px 5px; height: 45px; font-size: 13px; color: var(--text-main); }
+        th { background: var(--card-bg); position: sticky; top: 0; z-index: 1; font-weight: 700; color: var(--text-muted); text-transform: uppercase; font-size: 11px; letter-spacing: 1px;}
+        .cell { cursor: pointer; transition: 0.2s; font-weight: 600; }
+        .cell:active { transform: scale(0.95); border-radius: 8px; }
+        
+        .cell.bulk-selected { outline: 3px solid var(--primary) !important; background-color: rgba(42, 100, 246, 0.3) !important; transform: scale(0.95); border-radius: 6px; z-index: 2; position: relative; }
+        .bulk-action-panel { display: none; position: fixed; bottom: 75px; left: 50%; transform: translateX(-50%); z-index: 1500; background: var(--card-bg); border: 2px solid var(--primary); padding: 15px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); width: 90%; max-width: 350px; text-align: center; }
+
+        .pie-container { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; margin-bottom: 25px; }
+        .pie-chart { width: 130px; height: 130px; border-radius: 50%; border: 4px solid var(--card-bg); box-shadow: 0 0 15px rgba(0,0,0,0.3); background: conic-gradient(var(--border-color) 0% 100%); transition: background 0.5s ease; }
+        .chart-bar-wrapper { display: flex; height: 24px; border-radius: 12px; overflow: hidden; background: var(--bg-color); width: 100%; border: 1px solid var(--border-color); }
+        .chart-segment { height: 100%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 11px; font-weight: 800; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
+        .chart-legend { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 15px; font-size: 13px; font-weight: 600; color: var(--text-muted); }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-color { width: 12px; height: 12px; border-radius: 4px; }
+        
+        .tag-inputs { display: flex; gap: 10px; margin-bottom: 15px; }
+        .tag-inputs input[type="text"] { flex: 1; padding: 12px; border: 1px solid var(--border-color); background: var(--bg-color); color: var(--text-main); border-radius: 10px; font-size: 14px; outline: none; }
+        .tag-inputs input[type="color"] { width: 45px; height: 45px; border: 1px solid var(--border-color); border-radius: 10px; cursor: pointer; padding: 2px; background: var(--bg-color); }
+        .tag-list { display: flex; gap: 10px; flex-wrap: wrap; }
+        .tag-item { padding: 6px 14px; border-radius: 20px; font-size: 12px; display: flex; align-items: center; gap: 8px; font-weight: 700; color: var(--text-main); border: 1px solid var(--border-color); background: rgba(255,255,255,0.05); }
+        .tag-delete { cursor: pointer; color: var(--danger); background: none; border: none; font-size: 16px; font-weight: bold; }
+        
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 2000; justify-content: center; align-items: center; }
+        .modal { background: var(--card-bg); padding: 25px; border-radius: 20px; width: 320px; max-width: 90%; border: 1px solid var(--border-color); box-shadow: 0 20px 40px rgba(0,0,0,0.5); animation: fadeIn 0.2s; }
+        .modal input, .modal select { width: 100%; padding: 12px; margin-bottom: 20px; border: 1px solid var(--border-color); background: var(--bg-color); color: var(--text-main); border-radius: 10px; font-size: 15px; outline: none; }
+
+        /* ================= APP 2: TIMER ================= */
         .tt-top-bar { background: rgba(42, 100, 246, 0.1); border: 1px solid rgba(42, 100, 246, 0.3); border-radius: 12px; padding: 12px; text-align: center; margin-bottom: 25px; }
+        .tt-top-bar span { color: var(--primary); font-weight: 800; letter-spacing: 1px; }
+        .tt-top-label { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; margin-right: 8px; letter-spacing: 0.5px; }
+        .tt-setup { text-align: center; padding: 20px 0; }
+        .tt-setup input { padding: 12px; width: 140px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-color); color: var(--text-main); text-align: center; font-size: 1.2rem; margin-right: 10px; outline: none;}
         .ring-container { position: relative; width: 240px; height: 240px; margin: 0 auto 30px; display: flex; justify-content: center; align-items: center; }
         .svg-ring { width: 100%; height: 100%; transform: rotate(-90deg); position: absolute; top: 0; left: 0; }
         .ring-track { fill: none; stroke: var(--bg-color); stroke-width: 10; }
-        .ring-progress { fill: none; stroke: var(--success); stroke-width: 10; stroke-linecap: round; stroke-dasharray: 710; transition: 0.5s linear; }
-        .tt-display { font-size: 2.8rem; font-weight: 800; }
+        .ring-progress { fill: none; stroke: var(--success); stroke-width: 10; stroke-linecap: round; stroke-dasharray: 710; transition: stroke-dashoffset 0.5s linear, stroke 0.3s ease; filter: drop-shadow(0 0 10px rgba(0, 208, 132, 0.3)); }
+        .tt-display-wrap { text-align: center; z-index: 2; }
+        .tt-display { font-size: 2.8rem; font-weight: 800; color: var(--text-main); line-height: 1; margin-bottom: 5px; font-variant-numeric: tabular-nums; }
+        .tt-display-label { font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
         .tt-controls { display: flex; gap: 15px; justify-content: center; margin-bottom: 30px; }
+        .tt-controls button { padding: 14px 30px; font-size: 14px; border-radius: 12px; }
         #tt-btn-start { background: var(--success); color: #000; }
-        #tt-btn-pause { background: var(--primary); }
-        .tt-log-item { display: flex; justify-content: space-between; background: var(--bg-color); border: 1px solid var(--border-color); padding: 12px; border-radius: 12px; margin-bottom: 10px; }
+        #tt-btn-pause { background: var(--primary); color: #fff; }
+        .tt-controls button:disabled { background: var(--border-color); color: var(--text-muted); transform: none; border: none;}
+        .tt-logs h3 { font-size: 1rem; color: var(--text-muted); border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px;}
+        .tt-log-item { display: flex; align-items: center; background: var(--bg-color); border: 1px solid var(--border-color); padding: 12px 15px; border-radius: 12px; margin-bottom: 10px; justify-content: space-between;}
+        .tt-log-date { color: var(--text-muted); font-weight: 700; font-size: 13px; text-transform: uppercase; }
+        .tt-log-time { color: var(--success); font-weight: 800; font-size: 15px; font-variant-numeric: tabular-nums;}
+        .tt-btn-del { background: rgba(255,59,48,0.1); border: none; color: var(--danger); width: 30px; height: 30px; border-radius: 8px; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 
-        /* ================= LISTS & NOTES ================= */
-        .list-item { display: flex; justify-content: space-between; padding: 16px; background: var(--bg-color); border-radius: 14px; border: 1px solid var(--border-color); margin-bottom: 10px;}
+        /* ================= APP 3 & 4 & 5: LIST ITEMS ================= */
+        .list-container { display: flex; flex-direction: column; gap: 12px; }
+        .list-item { display: flex; align-items: center; justify-content: space-between; padding: 16px; background: var(--bg-color); border-radius: 14px; border: 1px solid var(--border-color); transition: all 0.2s ease; }
+        .list-item:active { transform: scale(0.98); }
+        .list-item.completed { background: rgba(0, 208, 132, 0.05); border-color: rgba(0, 208, 132, 0.2); }
         .list-item.completed .item-text { text-decoration: line-through; color: var(--text-muted); }
-        .custom-checkbox { width: 24px; height: 24px; border: 2px solid var(--text-muted); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .item-left { display: flex; align-items: center; gap: 15px; flex: 1; overflow: hidden; cursor: pointer; }
+        .custom-checkbox { width: 24px; height: 24px; border: 2px solid var(--text-muted); border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: 0.2s; flex-shrink: 0; background: var(--card-bg); }
         .list-item.completed .custom-checkbox { background: var(--success); border-color: var(--success); }
-        .custom-checkbox::after { content: '✔'; color: #000; font-size: 12px; opacity: 0; }
+        .custom-checkbox::after { content: '✔'; color: #000; font-weight: 900; font-size: 12px; opacity: 0; transition: 0.2s; }
         .list-item.completed .custom-checkbox::after { opacity: 1; }
-        .item-delete { background: rgba(255,59,48,0.1); border: none; color: var(--danger); width: 34px; height: 34px; border-radius: 10px; cursor: pointer; }
+        .item-text { font-size: 15px; font-weight: 600; color: var(--text-main); word-wrap: break-word; flex: 1; transition: 0.2s; margin-top: 2px;}
+        .item-delete { background: rgba(255,59,48,0.1); border: none; color: var(--danger); width: 34px; height: 34px; border-radius: 10px; cursor: pointer; flex-shrink: 0; transition: 0.2s; display: flex; align-items: center; justify-content: center; }
 
-        /* Visual Editor Tools */
-        .btn-tool { padding: 8px 12px; background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: bold; white-space: nowrap; }
+        /* Quick Notes Visual Editor Grid */
+        .btn-tool { padding: 8px 12px; background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: bold; white-space: nowrap; transition: 0.1s;}
         .btn-tool:active { background: var(--border-color); }
-        [contenteditable="true"]:empty:before { content: attr(placeholder); color: var(--text-muted); }
+        [contenteditable="true"]:empty:before { content: attr(placeholder); color: var(--text-muted); pointer-events: none; display: block; }
         
-        #note-input h3, .note-text h3 { margin: 5px 0; color: var(--primary); font-size: 1.2rem; }
-        #note-input h4, .note-text h4 { margin: 5px 0; color: var(--success); font-size: 1.1rem; }
-        #note-input ul, #note-input ol, .note-text ul, .note-text ol { margin: 5px 0 5px 25px; padding: 0; }
+        #note-input h3, .note-text h3 { margin: 5px 0; color: var(--primary); font-size: 1.1rem; }
+        #note-input h4, .note-text h4 { margin: 5px 0; color: var(--success); font-size: 1rem; }
+        #note-input ul, #note-input ol, .note-text ul, .note-text ol { margin: 5px 0 5px 25px; padding: 0; list-style-position: outside; }
         #note-input li, .note-text li { margin-bottom: 4px; }
 
-        .note-card { background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; margin-bottom: 12px; position: relative; }
-        .note-text { font-size: 14px; white-space: pre-wrap; margin-right: 30px;}
+        .notes-grid { display: grid; gap: 12px; grid-template-columns: 1fr; margin-top: 15px; }
+        .note-card { background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; position: relative; }
+        .note-text { font-size: 14px; color: var(--text-main); white-space: pre-wrap; line-height: 1.5; margin-right: 70px; word-wrap: break-word;}
+        .note-date { font-size: 11px; color: var(--text-muted); margin-top: 10px; }
         .note-actions { position: absolute; top: 12px; right: 12px; display: flex; gap: 8px; }
-        
-        /* Modal */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 2000; justify-content: center; align-items: center; }
-        .modal { background: var(--card-bg); padding: 25px; border-radius: 20px; width: 320px; border: 1px solid var(--border-color); }
-        .modal input, .modal select { width: 100%; padding: 12px; margin-bottom: 20px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-color); color: white; }
+        .note-action-btn { width: 28px; height: 28px; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; transition: 0.2s; }
+        .btn-edit-note { background: rgba(42, 100, 246, 0.1); color: var(--primary); }
+        .btn-del-note { background: rgba(255, 59, 48, 0.1); color: var(--danger); }
+
+        /* Revision Specific grid */
+        .srs-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 15px; text-align: center; }
+        .srs-box { border: 1px solid var(--border-color); background: var(--bg-color); padding: 8px 4px; border-radius: 8px; cursor: pointer; transition: 0.2s; }
     </style>
 </head>
 <body>
 
-    <!-- PLANNER TAB -->
     <div id="view-planner" class="app-view active">
         <div class="card">
             <div class="header-action">
                 <h3 class="card-title">📅 Planner</h3>
                 <div style="display: flex; gap: 8px;">
-                    <button class="btn" id="wpk-bulkBtn" style="background:var(--border-color); padding: 6px 12px; font-size: 11px;">Bulk: OFF</button>
-                    <button class="btn btn-reset" id="wpk-resetBtn" style="padding: 6px 12px; font-size: 11px;">Reset</button>
+                    <button class="btn" id="wpk-bulkBtn" style="background:var(--border-color); color:var(--text-main); padding: 6px 12px; font-size: 11px;">Bulk: OFF</button>
+                    <button class="btn btn-reset" id="wpk-resetBtn" style="padding: 6px 12px; font-size: 11px;">Reset All</button>
                 </div>
             </div>
             <div class="table-wrapper">
-                <table id="wpk-weekTable"><thead><tr id="wpk-tableHeader"><th>Time</th></tr></thead><tbody id="wpk-tableBody"></tbody></table>
+                <table id="wpk-weekTable">
+                    <thead><tr id="wpk-tableHeader"><th>Time</th></tr></thead>
+                    <tbody id="wpk-tableBody"></tbody>
+                </table>
             </div>
+        </div>
+
+        <div class="card">
+            <h3 class="card-title">📊 Analytics</h3>
+            <div class="section-subtitle">Today's 24H Breakdown</div>
+            <div class="pie-container">
+                <div class="pie-chart" id="wpk-todayPie"></div>
+                <div class="chart-legend" id="wpk-pieLegend" style="flex: 1; margin-top: 0;"></div>
+            </div>
+            <div class="section-subtitle">Weekly Allocation</div>
+            <div class="chart-bar-wrapper" id="wpk-chartBar"></div>
+            <div class="chart-legend" id="wpk-chartLegend"></div>
         </div>
 
         <div class="card">
@@ -120,68 +186,92 @@
             <div class="tag-list" id="wpk-tagsContainer"></div>
         </div>
 
-        <!-- Cloud Sync & Backup -->
+        <div class="card">
+            <h3 class="card-title">💾 Text Backup (Safe Mode)</h3>
+            <div style="color:var(--text-muted); font-size:13px; margin-bottom:15px; line-height:1.4;">Bina internet ke backup safe rakhne ke liye ise copy karke Notepad me save karein.</div>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <button class="btn btn-add" id="backup-copy-btn" style="flex: 1; min-width: 140px;">Copy Backup</button>
+                <button class="btn btn-save" id="backup-paste-btn" style="flex: 1; min-width: 140px; margin-bottom: 0;">Paste & Restore</button>
+            </div>
+            <textarea id="backup-textarea" style="width:100%; height:100px; display:none; margin-top:15px; font-size:11px; padding:10px; border-radius:8px; border:1px solid var(--border-color); background:var(--bg-color); color:var(--text-main);" placeholder="Yahan backup code paste karein..."></textarea>
+            <button class="btn" id="backup-confirm-btn" style="width:100%; display:none; margin-top:10px; background:var(--danger);">Confirm Restore</button>
+        </div>
+
         <div class="card">
             <h3 class="card-title">☁️ Cloud Sync (KVDB)</h3>
-            <input type="text" id="kvdb-bucket-id" placeholder="Paste KVDB Bucket ID..." style="width:100%; padding:14px; border-radius:10px; background:var(--bg-color); color:white; border:1px solid var(--border-color); margin-bottom:15px; outline:none;">
-            <div style="display: flex; gap: 10px;">
-                <button class="btn btn-add" id="cloud-save-btn" style="flex: 1;">Save to Cloud</button>
-                <button class="btn btn-save" id="cloud-load-btn" style="flex: 1;">Load Data</button>
+            <div style="color:var(--text-muted); font-size:13px; margin-bottom:15px; line-height:1.4;">kvdb.io se free bucket banakar uska ID yahan daalo. Har device me wahi ID se data sync hoga.</div>
+            <div class="input-group" style="margin-bottom: 10px;">
+                <input type="text" id="kvdb-bucket-id" placeholder="Paste KVDB Bucket ID here...">
+            </div>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <button class="btn btn-add" id="cloud-save-btn" style="flex: 1; min-width: 140px;">Save to Cloud</button>
+                <button class="btn btn-save" id="cloud-load-btn" style="flex: 1; min-width: 140px; margin-bottom: 0;">Load from Cloud</button>
             </div>
         </div>
     </div>
 
-    <!-- TIMER TAB -->
+    <div class="bulk-action-panel" id="wpk-bulkActionPanel">
+        <span id="bulkCountText" style="display:block; margin-bottom:12px; font-weight:800; color:var(--primary); font-size: 15px;">0 Cells Selected</span>
+        <div style="display: flex; gap: 10px; justify-content: center;">
+            <button class="btn btn-add" id="wpk-bulkEditPopupBtn" style="flex: 1;">Edit Selected</button>
+            <button class="btn btn-clear" id="wpk-bulkCancelBtn" style="flex: 1; margin-bottom: 0;">Cancel</button>
+        </div>
+    </div>
+
     <div id="view-timer" class="app-view">
         <div class="card">
             <div class="tt-top-bar"><span class="tt-top-label">Day ends in:</span><span id="tt-midnight-timer">00:00:00</span></div>
-            <div class="header-action"><h3 class="card-title" style="margin:0;">🎯 Timer</h3><button class="btn btn-reset" id="tt-btn-clear-all" style="padding: 6px 12px;">Clear</button></div>
-            <div class="tt-setup" id="tt-setup-panel"><input type="number" id="tt-target-hours" placeholder="Hours" min="0.1" step="0.1"><button class="btn btn-add" id="tt-btn-set-target">Set Target</button></div>
+            <div class="header-action" style="border-bottom: 1px solid var(--border-color); padding-bottom: 15px;"><h3 class="card-title" style="margin:0;">🎯 Main Target</h3><button class="btn btn-reset" id="tt-btn-clear-all" style="padding: 6px 12px; font-size: 11px;">Clear</button></div>
+            <div class="tt-setup" id="tt-setup-panel"><input type="number" id="tt-target-hours" placeholder="Hours" min="0.1" step="0.1"><button class="btn" id="tt-btn-set-target">Set Target</button></div>
             
-            <div id="tt-active-panel" style="display: none; margin-top: 20px;">
+            <div id="tt-active-panel" style="display: none; margin-top: 30px;">
                 <div class="ring-container">
                     <svg class="svg-ring" viewBox="0 0 240 240"><circle class="ring-track" cx="120" cy="120" r="113"></circle><circle class="ring-progress" id="tt-ring-bar" cx="120" cy="120" r="113"></circle></svg>
                     <div class="tt-display-wrap">
                         <div class="tt-display" id="tt-time-display">00:00:00</div>
                         <div class="tt-display-label">Remaining</div>
+                        
+                        <div id="tt-break-display-wrap" style="display:none; margin-top:5px; color:var(--danger); font-weight:bold; font-size:14px;">
+                            <span id="tt-break-display">Break: 00:00</span>
+                        </div>
                     </div>
                 </div>
+
+                <div style="display:flex; justify-content:center; gap:8px; margin-bottom:15px; flex-wrap:wrap;">
+                    <button class="btn" style="background:rgba(42, 100, 246, 0.2); color:var(--primary); padding:8px 12px; font-size:12px;" onclick="ttSetSession(30)">⏱ 30m Target</button>
+                    <button class="btn" style="background:rgba(42, 100, 246, 0.2); color:var(--primary); padding:8px 12px; font-size:12px;" onclick="ttSetSession(45)">⏱ 45m Target</button>
+                    <button class="btn" style="background:rgba(42, 100, 246, 0.2); color:var(--primary); padding:8px 12px; font-size:12px;" onclick="ttSetSession(60)">⏱ 60m Target</button>
+                </div>
+
                 <div class="tt-controls">
                     <button class="btn" id="tt-btn-start">Start</button>
                     <button class="btn" id="tt-btn-pause" disabled>Pause & Save</button>
                 </div>
-                <div class="tt-logs"><div id="tt-log-list"></div></div>
+
+                <div style="display:flex; justify-content:center; gap:8px; margin-bottom:30px;">
+                    <button class="btn btn-reset" style="padding:8px 12px; font-size:12px;" onclick="ttStartBreak(10)">☕ 10m Break</button>
+                    <button class="btn btn-reset" style="padding:8px 12px; font-size:12px;" onclick="ttStartBreak(15)">☕ 15m Break</button>
+                </div>
+
+                <div class="tt-logs"><h3>Daily Logs</h3><div id="tt-log-list"></div></div>
             </div>
         </div>
     </div>
 
-    <!-- TODO & NOTES TAB -->
     <div id="view-todo" class="app-view">
-        <!-- Syllabus Tracker -->
         <div class="card">
-            <h3 class="card-title">📚 Syllabus Tracker</h3>
+            <div class="header-action" style="border-bottom: 1px solid var(--border-color); padding-bottom: 15px;"><h3 class="card-title" style="margin:0;">📝 To-Do List</h3><button class="btn btn-reset" id="todo-clear-all" style="padding: 6px 12px; font-size: 11px;">Clear All</button></div>
             <div class="input-group">
-                <input type="text" id="syll-topic" placeholder="Topic Name...">
-                <input type="number" id="syll-hours" placeholder="Hrs" style="max-width: 70px;">
-                <button class="btn btn-add" id="syll-add-btn">Add</button>
+                <input type="text" id="todo-input" placeholder="Type a task...">
+                <button class="btn btn-add" id="todo-add-btn">Add</button>
             </div>
-            <div id="syll-list"></div>
-        </div>
-
-        <!-- To-Do List -->
-        <div class="card">
-            <div class="header-action"><h3 class="card-title" style="margin:0;">📝 To-Do</h3></div>
-            <div class="input-group"><input type="text" id="todo-input" placeholder="Task..."><button class="btn btn-add" id="todo-add-btn">Add</button></div>
-            <div id="todo-list-container"></div>
+            <div class="list-container" id="todo-list-container"></div>
         </div>
         
-        <!-- VISUAL EDITOR NOTES -->
         <div class="card">
-            <h3 class="card-title" style="margin-bottom:5px;">🗒️ Visual Notes</h3>
-            <p style="font-size:12px; color:var(--text-muted); margin-bottom:15px;">Text select karo aur tools use karo.</p>
+            <div class="header-action" style="border-bottom: 1px solid var(--border-color); padding-bottom: 15px;"><h3 class="card-title" style="margin:0;">🗒️ Quick Notes (Visual)</h3></div>
             
-            <div style="display:flex; gap:6px; margin-bottom:10px; overflow-x:auto; padding-bottom:5px;">
-                <!-- onmousedown preventDefault is the magic fix for buttons -->
+            <div style="display:flex; gap:6px; margin-bottom:10px; overflow-x:auto; padding-bottom:5px; flex-wrap: nowrap;">
                 <button class="btn-tool" onmousedown="event.preventDefault(); document.execCommand('formatBlock', false, 'H3')">H3</button>
                 <button class="btn-tool" onmousedown="event.preventDefault(); document.execCommand('formatBlock', false, 'H4')">H4</button>
                 <div style="min-width:1px; background:var(--border-color); margin:0 2px;"></div>
@@ -200,47 +290,50 @@
                 <button class="btn-tool" onmousedown="event.preventDefault(); document.execCommand('foreColor', false, '#ffffff')" style="color:#ffffff;">⚪</button>
             </div>
 
-            <div style="display:flex; flex-direction:column; gap:10px;">
-                <div id="note-input" contenteditable="true" placeholder="Type here..." style="width:100%; min-height:120px; padding:15px; border:1px solid var(--border-color); border-radius:12px; background:var(--bg-color); color:var(--text-main); font-size:15px; outline:none; overflow-wrap: break-word;"></div>
-                <button class="btn btn-add" id="note-add-btn">Save Note</button>
+            <div class="input-group" style="align-items: flex-start; flex-direction:column; gap:10px;">
+                <div id="note-input" contenteditable="true" placeholder="Type notes here... (Use tools above for formatting)" style="width:100%; min-height:100px; padding:14px; border:1px solid var(--border-color); border-radius:12px; background:var(--bg-color); color:var(--text-main); font-size:15px; outline:none; overflow-wrap: break-word;"></div>
+                <button class="btn btn-add" id="note-add-btn" style="width:100%;">Save Note</button>
             </div>
-            <div id="notes-list-container" style="margin-top: 15px;"></div>
+            <div class="notes-grid" id="notes-list-container"></div>
+        </div>
+
+        <div class="card" id="view-syllabus">
+            <h3 class="card-title">📚 Syllabus Tracker</h3>
+            <div class="input-group">
+                <input type="text" id="syll-topic" placeholder="Topic Name...">
+                <input type="number" id="syll-hours" placeholder="Total Hrs" style="width: 80px;">
+                <button class="btn btn-add" id="syll-add-btn">Add</button>
+            </div>
+            <div id="syll-list"></div>
         </div>
     </div>
 
-    <!-- REVISION TAB -->
     <div id="view-srs" class="app-view">
         <div class="card">
-            <div class="header-action"><h3 class="card-title" style="margin:0;">🧠 Revision</h3></div>
+            <div class="header-action" style="border-bottom: 1px solid var(--border-color); padding-bottom: 15px;">
+                <h3 class="card-title" style="margin:0;">🧠 Revision (4-10-30-Custom)</h3>
+                <button class="btn btn-reset" id="srs-clear-all" style="padding: 6px 12px; font-size: 11px;">Clear All</button>
+            </div>
             <div class="input-group">
-                <input type="text" id="srs-input" placeholder="Topic...">
-                <input type="date" id="srs-custom-date">
+                <input type="text" id="srs-input" placeholder="Topic name...">
+                <input type="date" id="srs-custom-date" required>
                 <button class="btn btn-add" id="srs-add-btn">Add</button>
             </div>
-            <div id="srs-list-container"></div>
+            <div class="list-container" id="srs-list-container"></div>
         </div>
     </div>
 
-    <!-- MODALS & NAV -->
-    <div class="bulk-action-panel" id="wpk-bulkActionPanel">
-        <span id="bulkCountText" style="display:block; margin-bottom:12px; font-weight:bold; color:var(--primary);">0 Selected</span>
-        <div style="display: flex; gap: 10px;">
-            <button class="btn btn-add" id="wpk-bulkEditPopupBtn" style="flex:1;">Edit</button>
-            <button class="btn btn-clear" id="wpk-bulkCancelBtn" style="flex:1;">Cancel</button>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="wpk-modal"><div class="modal"><h3 id="wpk-modalTitle" style="text-align:center;">Edit</h3><input type="text" id="wpk-cellTask" placeholder="Task..."><select id="wpk-cellTag"></select><button class="btn btn-save" id="wpk-saveBtn">Save</button><button class="btn btn-clear" id="wpk-clearBtn">Clear</button><button class="btn btn-close" id="wpk-closeBtn">Cancel</button></div></div>
+    <div class="modal-overlay" id="wpk-modal"><div class="modal"><h3 id="wpk-modalTitle" style="margin-top:0; margin-bottom: 20px; text-align:center; font-size: 1.1rem; color:var(--text-main); text-transform:uppercase; letter-spacing:1px;">Edit Data</h3><input type="text" id="wpk-cellTask" placeholder="Task description..."><select id="wpk-cellTag"></select><button class="btn btn-save" id="wpk-saveBtn">Save</button><button class="btn btn-clear" id="wpk-clearBtn">Clear Cell(s)</button><button class="btn btn-close" id="wpk-closeBtn">Cancel</button></div></div>
 
     <nav class="bottom-nav">
         <button class="nav-btn active" onclick="switchTab('planner', this)"><span>📅</span> Planner</button>
         <button class="nav-btn" onclick="switchTab('timer', this)"><span>⏱️</span> Timer</button>
-        <button class="nav-btn" onclick="switchTab('todo', this)"><span>📝</span> Work</button>
-        <button class="nav-btn" onclick="switchTab('srs', this)"><span>🧠</span> Revise</button>
+        <button class="nav-btn" onclick="switchTab('todo', this)"><span>📝</span> To-Do</button>
+        <button class="nav-btn" onclick="switchTab('srs', this)"><span>🧠</span> Revision</button>
     </nav>
 
     <script>
-        // Tab Switcher
+        // ================= TAB SWITCHING =================
         function switchTab(tab, btnElement) {
             document.querySelectorAll('.app-view').forEach(v => v.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -249,235 +342,472 @@
             window.scrollTo(0,0);
         }
 
+        // ================= HELPER FUNCTIONS =================
+        function getTodayStr() { let d = new Date(); return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,'0') + "-" + String(d.getDate()).padStart(2,'0'); }
+        
+        function playAlarmSound() {
+            try {
+                let ctx = new (window.AudioContext || window.webkitAudioContext)();
+                for(let i=0; i<6; i++) {
+                    let osc = ctx.createOscillator(); 
+                    let gain = ctx.createGain();
+                    osc.connect(gain); gain.connect(ctx.destination);
+                    osc.type = 'square'; 
+                    osc.frequency.setValueAtTime(800, ctx.currentTime + i*0.4);
+                    osc.frequency.setValueAtTime(1200, ctx.currentTime + i*0.4 + 0.2);
+                    gain.gain.setValueAtTime(1, ctx.currentTime + i*0.4);
+                    gain.gain.setTargetAtTime(0.001, ctx.currentTime + i*0.4 + 0.3, 0.05);
+                    osc.start(ctx.currentTime + i*0.4); 
+                    osc.stop(ctx.currentTime + i*0.4 + 0.35);
+                }
+            } catch(e) {}
+        }
+
+        function requestNotifPerm() { if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") { Notification.requestPermission(); } }
+        function sendNotif(title, msg) { if ("Notification" in window && Notification.permission === "granted") { new Notification(title, { body: msg, requireInteraction: true }); } }
+
         // ================= APP 1: PLANNER =================
-        try {
+        (function initPlanner() {
             const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
             const defaultTags = { 't1': { name: 'Focus', color: '#2a64f6' }, 't2': { name: 'Break', color: '#ff3b30' }};
             let tags = JSON.parse(localStorage.getItem('wpk_tags')) || defaultTags;
             let schedule = JSON.parse(localStorage.getItem('wpk_schedule')) || {};
-            let isBulkMode = false, selectedCells = [];
+            
+            let currentCellId = null; let isBulkMode = false; let selectedCells = [];
 
             const tHead = document.getElementById('wpk-tableHeader'), tBody = document.getElementById('wpk-tableBody');
+            const tagsCont = document.getElementById('wpk-tagsContainer'), cellSelect = document.getElementById('wpk-cellTag'), modal = document.getElementById('wpk-modal');
+            const bulkBtn = document.getElementById('wpk-bulkBtn'), bulkPanel = document.getElementById('wpk-bulkActionPanel'), bulkCountText = document.getElementById('bulkCountText');
+
             days.forEach(d => { let th = document.createElement('th'); th.innerText = d; tHead.appendChild(th); });
             for(let h=0; h<24; h++) {
                 let tr = document.createElement('tr'); let timeStr = `${h%12||12}:00 ${h>=12?'PM':'AM'}`;
                 tr.innerHTML = `<td><strong style="color:var(--text-muted); font-size:11px;">${timeStr}</strong></td>`;
-                days.forEach(d => { 
-                    let td = document.createElement('td'); td.className = 'cell'; td.id = `${d}_${h}`; 
-                    td.onclick = () => handleCellClick(td.id, d, timeStr, td); tr.appendChild(td); 
-                });
+                days.forEach(d => { let td = document.createElement('td'); td.className = 'cell'; td.id = `${d}_${h}`; td.onclick = () => handleCellClick(td.id, d, timeStr, td); tr.appendChild(td); });
                 tBody.appendChild(tr);
             }
 
             function handleCellClick(id, day, time, el) {
                 if(isBulkMode) {
-                    if(selectedCells.includes(id)) { selectedCells = selectedCells.filter(c => c !== id); el.classList.remove('bulk-selected'); } 
+                    if(selectedCells.includes(id)) { selectedCells = selectedCells.filter(cid => cid !== id); el.classList.remove('bulk-selected'); } 
                     else { selectedCells.push(id); el.classList.add('bulk-selected'); }
-                    document.getElementById('wpk-bulkActionPanel').style.display = selectedCells.length ? 'block' : 'none';
-                    document.getElementById('bulkCountText').innerText = `${selectedCells.length} Selected`;
+                    updateBulkUI();
                 } else {
-                    document.getElementById('wpk-modalTitle').innerText = `${day} • ${time}`;
+                    currentCellId = id; document.getElementById('wpk-modalTitle').innerText = `${day} • ${time}`;
                     let data = schedule[id] || {task:'', tagId:''};
-                    document.getElementById('wpk-cellTask').value = data.task; 
-                    document.getElementById('wpk-cellTag').value = data.tagId;
-                    selectedCells = [id]; document.getElementById('wpk-modal').style.display = 'flex';
+                    document.getElementById('wpk-cellTask').value = data.task; document.getElementById('wpk-cellTag').value = data.tagId;
+                    selectedCells = [id]; modal.style.display = 'flex';
                 }
             }
 
-            document.getElementById('wpk-bulkBtn').onclick = function() {
-                isBulkMode = !isBulkMode; this.innerText = isBulkMode ? "Bulk: ON" : "Bulk: OFF";
-                this.style.background = isBulkMode ? "var(--primary)" : "var(--border-color)";
-                if(!isBulkMode) cancelBulk();
-            };
+            bulkBtn.onclick = () => { isBulkMode = !isBulkMode; if(isBulkMode) { bulkBtn.innerText = "Bulk: ON"; bulkBtn.style.background = "var(--primary)"; bulkBtn.style.color = "#fff"; updateBulkUI(); } else { bulkBtn.innerText = "Bulk: OFF"; bulkBtn.style.background = "var(--border-color)"; bulkBtn.style.color = "var(--text-main)"; cancelBulkSelection(); } };
+            function updateBulkUI() { if(isBulkMode && selectedCells.length > 0) { bulkPanel.style.display = 'block'; bulkCountText.innerText = `${selectedCells.length} Cells Selected`; } else { bulkPanel.style.display = 'none'; } }
+            function cancelBulkSelection() { selectedCells.forEach(id => { let el = document.getElementById(id); if(el) el.classList.remove('bulk-selected'); }); selectedCells = []; updateBulkUI(); }
+            document.getElementById('wpk-bulkCancelBtn').onclick = cancelBulkSelection;
+            document.getElementById('wpk-bulkEditPopupBtn').onclick = () => { document.getElementById('wpk-modalTitle').innerText = `Editing ${selectedCells.length} Cells`; document.getElementById('wpk-cellTask').value = ''; document.getElementById('wpk-cellTag').value = ''; modal.style.display = 'flex'; };
 
-            function cancelBulk() { selectedCells.forEach(id => document.getElementById(id).classList.remove('bulk-selected')); selectedCells = []; document.getElementById('wpk-bulkActionPanel').style.display = 'none'; }
-            document.getElementById('wpk-bulkCancelBtn').onclick = cancelBulk;
-            document.getElementById('wpk-bulkEditPopupBtn').onclick = () => { document.getElementById('wpk-modalTitle').innerText = `Editing ${selectedCells.length} Cells`; document.getElementById('wpk-modal').style.display = 'flex'; };
-            document.getElementById('wpk-closeBtn').onclick = () => { document.getElementById('wpk-modal').style.display = 'none'; if(isBulkMode) cancelBulk(); };
-            
-            document.getElementById('wpk-saveBtn').onclick = () => {
-                let t = document.getElementById('wpk-cellTask').value.trim(), tag = document.getElementById('wpk-cellTag').value;
-                selectedCells.forEach(id => { if(tag) schedule[id] = {task: t, tagId: tag}; else delete schedule[id]; });
-                saveP(); document.getElementById('wpk-modal').style.display = 'none'; updateP(); if(isBulkMode) cancelBulk();
-            };
-            document.getElementById('wpk-clearBtn').onclick = () => { selectedCells.forEach(id => delete schedule[id]); saveP(); document.getElementById('wpk-modal').style.display = 'none'; updateP(); if(isBulkMode) cancelBulk(); };
-
-            document.getElementById('wpk-addTagBtn').onclick = () => {
-                let n = document.getElementById('wpk-newTagName').value.trim(), c = document.getElementById('wpk-newTagColor').value;
-                if(n) { tags['tag_'+Date.now()] = {name: n, color: c}; document.getElementById('wpk-newTagName').value=''; saveP(); renderTags(); updateP(); }
-            };
-
-            window.wpkDeleteTag = (id) => { if(confirm('Delete tag?')) { delete tags[id]; for(let i in schedule) if(schedule[i].tagId===id) delete schedule[i]; saveP(); renderTags(); updateP(); }};
-            document.getElementById('wpk-resetBtn').onclick = () => { if(confirm('Reset Plan?')) { tags = JSON.parse(JSON.stringify(defaultTags)); schedule = {}; saveP(); renderTags(); updateP(); }};
-
-            function saveP() { localStorage.setItem('wpk_tags', JSON.stringify(tags)); localStorage.setItem('wpk_schedule', JSON.stringify(schedule)); }
-            
             function renderTags() {
-                let tC = document.getElementById('wpk-tagsContainer'), sC = document.getElementById('wpk-cellTag');
-                tC.innerHTML = ''; sC.innerHTML = '<option value="">-- No Tag --</option>';
-                for(let i in tags) { tC.innerHTML += `<div class="tag-item" style="border-left: 4px solid ${tags[i].color}">${tags[i].name} <button class="tag-delete" onclick="wpkDeleteTag('${i}')">✖</button></div>`; sC.innerHTML += `<option value="${i}">${tags[i].name}</option>`; }
+                tagsCont.innerHTML = ''; cellSelect.innerHTML = '<option value="">-- No Tag --</option>';
+                for(let id in tags) { tagsCont.innerHTML += `<div class="tag-item" style="border-left: 4px solid ${tags[id].color}">${tags[id].name} <button class="tag-delete" onclick="wpkDeleteTag('${id}')">✖</button></div>`; cellSelect.innerHTML += `<option value="${id}">${tags[id].name}</option>`; }
             }
-            
-            function updateP() {
-                document.querySelectorAll('.cell').forEach(c => {
-                    let d = schedule[c.id];
-                    if(d && tags[d.tagId]) { c.innerText = d.task || tags[d.tagId].name; c.style.backgroundColor = tags[d.tagId].color + '30'; c.style.borderLeft = `3px solid ${tags[d.tagId].color}`; c.style.color = '#fff'; }
-                    else { c.innerText = ''; c.style.backgroundColor = ''; c.style.borderLeft = ''; }
-                });
+
+            function updateCharts() {
+                let counts = {}; let total = 0; for(let id in tags) counts[id] = 0;
+                for(let cid in schedule) { let tid = schedule[cid].tagId; if(counts[tid] !== undefined) { counts[tid]++; total++; } }
+                const bar = document.getElementById('wpk-chartBar'), legend = document.getElementById('wpk-chartLegend');
+                bar.innerHTML = ''; legend.innerHTML = '';
+                if(total === 0) { bar.innerHTML = '<div style="width:100%; text-align:center; font-size:12px; line-height:24px; color:var(--text-muted);">No data</div>'; }
+                else { for(let id in tags) { if(counts[id] > 0) { let pct = (counts[id]/168)*100; bar.innerHTML += `<div class="chart-segment" style="width:${pct}%; background:${tags[id].color}">${counts[id]}h</div>`; legend.innerHTML += `<div class="legend-item"><div class="legend-color" style="background:${tags[id].color}"></div> <span>${tags[id].name}: ${counts[id]}h</span></div>`; } } }
+
+                let dMap = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'], todayStr = dMap[new Date().getDay()];
+                let todayCounts = {}; let todayFilled = 0; for(let id in tags) todayCounts[id] = 0;
+                for(let h=0; h<24; h++) { let d = schedule[todayStr + '_' + h]; if(d && tags[d.tagId]) { todayCounts[d.tagId]++; todayFilled++; } }
+                let emptyHours = 24 - todayFilled; const pieChart = document.getElementById('wpk-todayPie'), pieLegend = document.getElementById('wpk-pieLegend');
+                let gradientSegments = []; let currentPct = 0; let pieLegendHtml = '';
+                for(let id in tags) { if(todayCounts[id] > 0) { let pct = (todayCounts[id] / 24) * 100; gradientSegments.push(`${tags[id].color} ${currentPct}% ${currentPct + pct}%`); currentPct += pct; pieLegendHtml += `<div class="legend-item"><div class="legend-color" style="background:${tags[id].color}"></div> <span>${tags[id].name}: ${todayCounts[id]}h</span></div>`; } }
+                if(emptyHours > 0) { gradientSegments.push(`var(--border-color) ${currentPct}% 100%`); pieLegendHtml += `<div class="legend-item"><div class="legend-color" style="background:var(--border-color)"></div> <span>Empty: ${emptyHours}h</span></div>`; }
+                if(gradientSegments.length > 0) { pieChart.style.background = `conic-gradient(${gradientSegments.join(', ')})`; } else { pieChart.style.background = `conic-gradient(var(--border-color) 0% 100%)`; }
+                pieLegend.innerHTML = pieLegendHtml;
             }
-            renderTags(); updateP();
-        } catch(e) { console.log('Planner Error:', e); }
+
+            function updateUI() { document.querySelectorAll('.cell').forEach(c => { let d = schedule[c.id]; if(d && tags[d.tagId]) { c.innerText = d.task || tags[d.tagId].name; c.style.backgroundColor = tags[d.tagId].color + '30'; c.style.borderLeft = `3px solid ${tags[d.tagId].color}`; c.style.color = '#fff'; } else { c.innerText = ''; c.style.backgroundColor = ''; c.style.borderLeft = ''; } }); updateCharts(); }
+
+            document.getElementById('wpk-closeBtn').onclick = () => { modal.style.display = 'none'; if(isBulkMode) cancelBulkSelection(); };
+            document.getElementById('wpk-saveBtn').onclick = () => { requestNotifPerm(); let task = document.getElementById('wpk-cellTask').value.trim(), tagId = document.getElementById('wpk-cellTag').value; selectedCells.forEach(cid => { if(tagId) schedule[cid] = {task, tagId}; else delete schedule[cid]; }); save(); modal.style.display = 'none'; updateUI(); if(isBulkMode) cancelBulkSelection(); };
+            document.getElementById('wpk-clearBtn').onclick = () => { selectedCells.forEach(cid => delete schedule[cid]); save(); modal.style.display = 'none'; updateUI(); if(isBulkMode) cancelBulkSelection(); };
+            document.getElementById('wpk-addTagBtn').onclick = () => { let name = document.getElementById('wpk-newTagName').value.trim(), color = document.getElementById('wpk-newTagColor').value; if(!name) return alert('Name required'); tags['tag_'+Date.now()] = {name, color}; document.getElementById('wpk-newTagName').value=''; save(); renderTags(); updateCharts(); };
+            window.wpkDeleteTag = (id) => { if(confirm('Delete?')) { delete tags[id]; for(let i in schedule) if(schedule[i].tagId===id) delete schedule[i]; save(); renderTags(); updateUI(); }};
+            document.getElementById('wpk-resetBtn').onclick = () => { if(confirm('Reset Data?')) { tags = JSON.parse(JSON.stringify(defaultTags)); schedule = {}; save(); renderTags(); updateUI(); }};
+            function save() { localStorage.setItem('wpk_tags', JSON.stringify(tags)); localStorage.setItem('wpk_schedule', JSON.stringify(schedule)); }
+            renderTags(); updateUI();
+
+            let lastCheckedHour = new Date().getHours();
+            setInterval(() => {
+                let now = new Date(), currHour = now.getHours();
+                if (currHour !== lastCheckedHour) {
+                    let dMap = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'], todayStr = dMap[now.getDay()];
+                    let data = schedule[todayStr + '_' + currHour];
+                    if (data) { let tName = data.task || (tags[data.tagId] ? tags[data.tagId].name : 'Task'); playAlarmSound(); sendNotif("📅 Scheduled Task", `Time: ${currHour}:00 \nTask: ${tName}`); }
+                    lastCheckedHour = currHour;
+                }
+            }, 10000);
+        })();
 
         // ================= APP 2: TIMER =================
-        try {
+        (function initTimer() {
             let ttData = JSON.parse(localStorage.getItem('tt_data')) || { total: -1, remaining: -1, logs: {} };
-            let timerInt = null, isRun = false, startT = 0, initialR = 0;
-            const disp = document.getElementById('tt-time-display'), bar = document.getElementById('tt-ring-bar');
+            let timerInterval = null, isRunning = false, sessionSeconds = 0, initialSessionRemaining = 0, startTime = 0;
+            let sessionLimitSec = 0; let breakInterval = null; let breakSec = 0;
+
+            const setupPanel = document.getElementById('tt-setup-panel'), activePanel = document.getElementById('tt-active-panel'), display = document.getElementById('tt-time-display'), ringBar = document.getElementById('tt-ring-bar'), btnStart = document.getElementById('tt-btn-start'), btnPause = document.getElementById('tt-btn-pause'), logList = document.getElementById('tt-log-list'), dailyMidnightDisplay = document.getElementById('tt-midnight-timer');
+            const breakDisplayWrap = document.getElementById('tt-break-display-wrap'), breakDisplay = document.getElementById('tt-break-display');
+            const maxOffset = 710;
+
+            setInterval(() => { let now = new Date(), mid = new Date(); mid.setHours(23, 59, 59, 999); let diff = Math.max(0, Math.floor((mid - now)/1000)); dailyMidnightDisplay.innerText = [Math.floor(diff/3600), Math.floor((diff%3600)/60), diff%60].map(v => String(v).padStart(2,'0')).join(':'); }, 1000);
+            function formatTime(secs) { if(secs<=0) return "00:00:00"; return [Math.floor(secs/3600), Math.floor((secs%3600)/60), secs%60].map(v => String(v).padStart(2,'0')).join(':'); }
             
-            function fmtTime(s) { if(s<=0) return "00:00:00"; return [Math.floor(s/3600), Math.floor((s%3600)/60), s%60].map(v=>String(v).padStart(2,'0')).join(':'); }
-            
-            function updTimer() {
-                if(ttData.total === -1) { document.getElementById('tt-setup-panel').style.display='block'; document.getElementById('tt-active-panel').style.display='none'; }
+            function updateUI() {
+                if(ttData.total === -1) { setupPanel.style.display = 'block'; activePanel.style.display = 'none'; } 
                 else {
-                    document.getElementById('tt-setup-panel').style.display='none'; document.getElementById('tt-active-panel').style.display='block';
-                    let r = ttData.remaining; disp.innerText = r > 0 ? fmtTime(r) : "DONE";
-                    bar.style.strokeDashoffset = 710 - (Math.max(0, r/ttData.total) * 710);
-                    document.getElementById('tt-log-list').innerHTML = Object.keys(ttData.logs).reverse().map(k => `<div class="tt-log-item"><span>${k}</span><strong style="color:var(--success)">${fmtTime(ttData.logs[k])}</strong></div>`).join('');
+                    setupPanel.style.display = 'none'; activePanel.style.display = 'block';
+                    let rem = ttData.remaining; display.innerText = rem > 0 ? formatTime(rem) : "REACHED"; display.style.color = rem > 0 ? "var(--text-main)" : "var(--danger)"; btnStart.disabled = (rem <= 0);
+                    let ratio = Math.max(0, rem / ttData.total); ringBar.style.strokeDashoffset = maxOffset - (ratio * maxOffset);
+                    let color = ratio > 0.3 ? "var(--success)" : (ratio > 0.1 ? "#ffcc00" : "var(--danger)"); ringBar.style.stroke = color; ringBar.style.filter = `drop-shadow(0 0 10px ${color}60)`;
+                    logList.innerHTML = ''; let dates = Object.keys(ttData.logs).sort().reverse();
+                    if(dates.length === 0) logList.innerHTML = '<p style="color:var(--text-muted);text-align:center;font-size:13px;">No logs yet.</p>';
+                    dates.forEach(dateStr => { let label = dateStr === getTodayStr() ? `Today (${dateStr})` : dateStr; logList.innerHTML += `<div class="tt-log-item"><span class="tt-log-date">${label}</span><span class="tt-log-time">${formatTime(ttData.logs[dateStr])}</span><button class="tt-btn-del" onclick="ttDeleteLog('${dateStr}')">✖</button></div>`; });
                 }
             }
 
-            document.getElementById('tt-btn-set-target').onclick = () => { let h = parseFloat(document.getElementById('tt-target-hours').value); if(h>0){ ttData.total = Math.floor(h*3600); ttData.remaining = ttData.total; localStorage.setItem('tt_data', JSON.stringify(ttData)); updTimer(); }};
-            document.getElementById('tt-btn-start').onclick = () => {
-                if(!isRun && ttData.remaining > 0) {
-                    isRun=true; document.getElementById('tt-btn-start').disabled=true; document.getElementById('tt-btn-pause').disabled=false;
-                    startT=Date.now(); initialR=ttData.remaining;
-                    timerInt = setInterval(() => {
-                        let sec = Math.floor((Date.now()-startT)/1000); let cR = initialR - sec;
-                        if(cR<=0){ clearInterval(timerInt); isRun=false; cR=0; }
-                        disp.innerText = fmtTime(cR); bar.style.strokeDashoffset = 710 - ((cR/ttData.total)*710);
-                    }, 1000);
-                }
-            };
-            document.getElementById('tt-btn-pause').onclick = () => {
-                if(isRun) {
-                    isRun=false; clearInterval(timerInt); document.getElementById('tt-btn-start').disabled=false; document.getElementById('tt-btn-pause').disabled=true;
-                    let sec = Math.floor((Date.now()-startT)/1000); ttData.remaining = Math.max(0, ttData.remaining-sec);
-                    let today = getTodayStr(); ttData.logs[today] = (ttData.logs[today] || 0) + sec;
-                    localStorage.setItem('tt_data', JSON.stringify(ttData)); updTimer();
-                }
-            };
-            document.getElementById('tt-btn-clear-all').onclick = () => { if(confirm('Clear Timer?')) { ttData = {total:-1, remaining:-1, logs:{}}; localStorage.setItem('tt_data', JSON.stringify(ttData)); updTimer(); }};
-            updTimer();
-        } catch(e) { console.log('Timer Error:', e); }
+            document.getElementById('tt-btn-set-target').onclick = () => { let hrs = parseFloat(document.getElementById('tt-target-hours').value); if(hrs > 0) { let s = Math.floor(hrs * 3600); ttData.total = s; ttData.remaining = s; saveTT(); updateUI(); } else alert('Invalid time'); };
+            
+            window.ttSetSession = (mins) => { if(ttData.remaining <= 0) return alert("Pehle Total Target set karo!"); sessionLimitSec = mins * 60; if(sessionLimitSec > ttData.remaining) sessionLimitSec = ttData.remaining; if(!isRunning) btnStart.click(); };
 
-        // ================= APP 3: SYLLABUS =================
-        try {
-            function rSyll() {
-                let d = JSON.parse(localStorage.getItem('syll_data')||'[]');
-                document.getElementById('syll-list').innerHTML = d.map((itm, i) => {
-                    let subs = (itm.subs||[]).map((s, si) => {
-                        let isD = typeof s !== 'string' && s.done; let t = typeof s === 'string' ? s : s.text;
-                        return `<div style="display:flex; align-items:center; gap:8px; background:rgba(255,255,255,0.05); padding:8px; border-radius:8px; border:1px solid var(--border-color); margin-top:6px;">
-                            <input type="checkbox" ${isD?'checked':''} onchange="tSyllSub(${i},${si})" style="width:16px;height:16px;">
-                            <span style="flex:1; font-size:13px; ${isD?'text-decoration:line-through;color:gray':''}">${t}</span>
-                            <button onclick="dSyllSub(${i},${si})" style="background:none;border:none;color:red;font-size:16px;">×</button>
-                        </div>`;
-                    }).join('');
-                    return `<div style="background:var(--bg-color); padding:15px; border-radius:12px; margin-bottom:12px; border:1px solid var(--border-color)">
-                        <div style="display:flex; justify-content:space-between; margin-bottom:10px;"><strong style="color:var(--primary)">${itm.topic}</strong><button onclick="dSyll(${i})" style="background:none;border:none;color:red;">✖</button></div>
-                        <div style="font-size:13px; margin-bottom:10px;">Done: <input type="number" value="${itm.done}" onchange="uSyllHrs(${i},this.value)" style="width:60px; padding:4px; background:var(--card-bg); color:white; border:1px solid var(--border-color);"> / ${itm.total} Hrs</div>
-                        <input type="text" placeholder="+ Subtask (Enter)" onkeypress="if(event.key==='Enter' && this.value){ aSyllSub(${i},this.value); this.value=''; }" style="width:100%; padding:10px; border-radius:8px; background:var(--card-bg); border:1px solid var(--border-color); color:white; outline:none;">
-                        ${subs}
-                    </div>`;
-                }).join('');
+            window.ttStartBreak = (mins) => {
+                requestNotifPerm(); if(isRunning) btnPause.click(); 
+                clearInterval(breakInterval); breakSec = mins * 60; breakDisplayWrap.style.display = 'block';
+                breakInterval = setInterval(() => {
+                    breakSec--;
+                    if(breakSec <= 0) { clearInterval(breakInterval); breakDisplayWrap.style.display = 'none'; playAlarmSound(); sendNotif("☕ Break Over!", "Wapas padhai pe lag jao!"); } 
+                    else { let m = Math.floor(breakSec / 60); let s = breakSec % 60; breakDisplay.innerText = `Break: ${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`; }
+                }, 1000);
+            };
+
+            btnStart.onclick = () => {
+                requestNotifPerm();
+                if(!isRunning && ttData.remaining > 0) {
+                    isRunning = true; btnStart.disabled = true; btnPause.disabled = false; startTime = Date.now(); initialSessionRemaining = ttData.remaining;
+                    timerInterval = setInterval(() => {
+                        sessionSeconds = Math.floor((Date.now() - startTime) / 1000); let currRem = initialSessionRemaining - sessionSeconds; let limitReached = false;
+                        if(sessionLimitSec > 0 && sessionSeconds >= sessionLimitSec) { currRem = initialSessionRemaining - sessionLimitSec; sessionSeconds = sessionLimitSec; limitReached = true; }
+                        if(currRem <= 0) { currRem = 0; limitReached = true; }
+                        display.innerText = formatTime(currRem); ringBar.style.strokeDashoffset = maxOffset - ((currRem / ttData.total) * maxOffset);
+                        if(limitReached) { btnPause.click(); playAlarmSound(); sendNotif("🎯 Target Done!", "Session ya Main Target poora ho gaya!"); sessionLimitSec = 0; }
+                    }, 500);
+                }
+            };
+
+            btnPause.onclick = () => { if(isRunning) { isRunning = false; clearInterval(timerInterval); btnStart.disabled = false; btnPause.disabled = true; if(sessionSeconds > 0) { ttData.remaining = Math.max(0, ttData.remaining - sessionSeconds); let today = getTodayStr(); ttData.logs[today] = (ttData.logs[today] || 0) + sessionSeconds; saveTT(); updateUI(); } } };
+            window.ttDeleteLog = (d) => { if(confirm('Delete log?')) { delete ttData.logs[d]; saveTT(); updateUI(); } };
+            document.getElementById('tt-btn-clear-all').onclick = () => { if(confirm('Clear all?')) { ttData = { total: -1, remaining: -1, logs: {} }; saveTT(); updateUI(); } };
+            function saveTT() { localStorage.setItem('tt_data', JSON.stringify(ttData)); }
+            updateUI();
+        })();
+
+        // ================= APP 3: TO-DO & NOTES (VISUAL EDITOR) =================
+        (function initTodo() {
+            let todos = JSON.parse(localStorage.getItem('todo_data')) || [];
+            const listContainer = document.getElementById('todo-list-container'), inputField = document.getElementById('todo-input'), addBtn = document.getElementById('todo-add-btn');
+            function renderTodos() { listContainer.innerHTML = ''; if(todos.length === 0) { listContainer.innerHTML = '<p style="text-align:center; color:var(--text-muted); margin-top:20px; font-size:13px;">No tasks available.</p>'; return; } todos.forEach((todo, index) => { listContainer.innerHTML += `<div class="list-item ${todo.completed ? 'completed' : ''}"><div class="item-left" onclick="toggleTodo(${index})"><div class="custom-checkbox"></div><span class="item-text">${todo.text}</span></div><button class="item-delete" onclick="deleteTodo(${index})">✖</button></div>`; }); }
+            addBtn.onclick = () => { if(inputField.value.trim()) { todos.unshift({ text: inputField.value.trim(), completed: false }); inputField.value = ''; localStorage.setItem('todo_data', JSON.stringify(todos)); renderTodos(); } };
+            inputField.addEventListener('keypress', e => { if(e.key === 'Enter') addBtn.click(); });
+            window.toggleTodo = i => { todos[i].completed = !todos[i].completed; localStorage.setItem('todo_data', JSON.stringify(todos)); renderTodos(); };
+            window.deleteTodo = i => { todos.splice(i, 1); localStorage.setItem('todo_data', JSON.stringify(todos)); renderTodos(); };
+            document.getElementById('todo-clear-all').onclick = () => { if(todos.length && confirm('Clear All Tasks?')) { todos = []; localStorage.setItem('todo_data', JSON.stringify(todos)); renderTodos(); } };
+            renderTodos();
+
+            let notes = JSON.parse(localStorage.getItem('quick_notes')) || []; let editingNoteIndex = -1; 
+            const notesContainer = document.getElementById('notes-list-container'), noteInput = document.getElementById('note-input'), noteAddBtn = document.getElementById('note-add-btn');
+            function renderNotes() { notesContainer.innerHTML = ''; if(notes.length === 0) { notesContainer.innerHTML = '<p style="text-align:center; color:var(--text-muted); font-size:13px;">No notes saved.</p>'; return; } notes.forEach((note, index) => { notesContainer.innerHTML += `<div class="note-card"><div class="note-text">${note.text}</div><div class="note-date">${note.date}</div><div class="note-actions"><button class="note-action-btn btn-edit-note" onclick="editNote(${index})">✏️</button><button class="note-action-btn btn-del-note" onclick="deleteNote(${index})">✖</button></div></div>`; }); }
+            
+            noteAddBtn.onclick = () => { 
+                let text = noteInput.innerHTML.trim(); 
+                if(text && text !== '<br>') { 
+                    let d = new Date(); 
+                    let dateStr = `${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')} • ${d.getHours()}:${d.getMinutes().toString().padStart(2,'0')}`; 
+                    if(editingNoteIndex > -1) { 
+                        notes[editingNoteIndex].text = text; 
+                        notes[editingNoteIndex].date = dateStr + " (Edited)"; 
+                        editingNoteIndex = -1; 
+                        noteAddBtn.innerText = 'Save Note'; 
+                    } else { 
+                        notes.unshift({ text: text, date: dateStr }); 
+                    } 
+                    noteInput.innerHTML = ''; 
+                    localStorage.setItem('quick_notes', JSON.stringify(notes)); 
+                    renderNotes(); 
+                } 
+            };
+            
+            window.editNote = i => { 
+                noteInput.innerHTML = notes[i].text; 
+                editingNoteIndex = i; 
+                noteAddBtn.innerText = 'Update Note'; 
+                noteInput.focus(); 
+                window.scrollTo({ top: noteInput.offsetTop - 50, behavior: 'smooth' }); 
+            };
+            
+            window.deleteNote = i => { 
+                if(confirm('Delete note?')) { 
+                    if(editingNoteIndex === i) { 
+                        editingNoteIndex = -1; 
+                        noteAddBtn.innerText = 'Save Note'; 
+                        noteInput.innerHTML = ''; 
+                    } 
+                    notes.splice(i, 1); 
+                    localStorage.setItem('quick_notes', JSON.stringify(notes)); 
+                    renderNotes(); 
+                } 
+            };
+            renderNotes();
+        })();
+
+        // ================= APP 4: REVISION TRACKER =================
+        (function initSRS() {
+            let srsData = JSON.parse(localStorage.getItem('srs_data_v2')) || [];
+            const listContainer = document.getElementById('srs-list-container'), inputField = document.getElementById('srs-input'), customDateInput = document.getElementById('srs-custom-date'), addBtn = document.getElementById('srs-add-btn');
+            function formatDate(dStr) { let d = new Date(dStr); return `${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')}`; }
+            function renderSRS() { listContainer.innerHTML = ''; if(srsData.length === 0) { listContainer.innerHTML = '<p style="text-align:center; color:var(--text-muted); margin-top:20px; font-size:13px;">No topics added yet.</p>'; return; } let todayStr = getTodayStr(); srsData.forEach((item, index) => { let html = `<div class="card" style="padding: 15px; margin-bottom: 0; background: rgba(255,255,255,0.02);"><div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;"><strong style="color:var(--primary); font-size: 15px;">${item.topic}</strong><button class="item-delete" style="width:28px; height:28px; font-size: 12px;" onclick="srsDelete(${index})">✖</button></div><div class="srs-grid">`; let revs = [ { label: '+4 Din', date: item.r4, done: item.d4, key: 'd4' }, { label: '+10 Din', date: item.r10, done: item.d10, key: 'd10' }, { label: '+30 Din', date: item.r30, done: item.d30, key: 'd30' }, { label: 'Custom', date: item.rc, done: item.dc, key: 'dc' } ]; revs.forEach((r) => { let isPastOrToday = new Date(r.date) <= new Date(todayStr); let bg = r.done ? 'rgba(0, 208, 132, 0.1)' : (isPastOrToday ? 'rgba(255,59,48,0.1)' : 'transparent'); let color = r.done ? 'var(--success)' : (isPastOrToday && !r.done ? 'var(--danger)' : 'var(--text-muted)'); let border = r.done ? 'var(--success)' : (isPastOrToday ? 'var(--danger)' : 'var(--border-color)'); html += `<div class="srs-box" onclick="srsToggle(${index}, '${r.key}')" style="border-color: ${border}; background: ${bg};"><div style="font-size: 10px; text-transform: uppercase; color: ${color}; font-weight: bold; margin-bottom: 3px;">${r.label}</div><div style="font-size: 13px; color: ${color}; font-weight: 700;">${formatDate(r.date)}</div></div>`; }); html += `</div></div>`; listContainer.innerHTML += html; }); }
+            addBtn.onclick = () => { let topic = inputField.value.trim(); let customDate = customDateInput.value; if(!topic) return alert('Topic ka naam likho!'); if(!customDate) return alert('4th revision ke liye custom date select karo!'); requestNotifPerm(); let today = new Date(); function addDays(d, days) { let res = new Date(d); res.setDate(res.getDate() + days); return res.getFullYear() + "-" + String(res.getMonth()+1).padStart(2,'0') + "-" + String(res.getDate()).padStart(2,'0'); } srsData.unshift({ topic: topic, added: getTodayStr(), r4: addDays(today, 4), d4: false, r10: addDays(today, 10), d10: false, r30: addDays(today, 30), d30: false, rc: customDate, dc: false }); inputField.value = ''; customDateInput.value = ''; localStorage.setItem('srs_data_v2', JSON.stringify(srsData)); renderSRS(); };
+            window.srsToggle = (i, key) => { srsData[i][key] = !srsData[i][key]; localStorage.setItem('srs_data_v2', JSON.stringify(srsData)); renderSRS(); };
+            window.srsDelete = i => { if(confirm('Delete topic?')) { srsData.splice(i, 1); localStorage.setItem('srs_data_v2', JSON.stringify(srsData)); renderSRS(); } };
+            document.getElementById('srs-clear-all').onclick = () => { if(srsData.length && confirm('Clear All Data?')) { srsData = []; localStorage.setItem('srs_data_v2', JSON.stringify(srsData)); renderSRS(); } };
+            renderSRS();
+
+            let lastCheckedDate = "";
+            setInterval(() => { let todayStr = getTodayStr(); if (todayStr !== lastCheckedDate) { let pending = 0; srsData.forEach(item => { if ((item.r4 === todayStr && !item.d4) || (item.r10 === todayStr && !item.d10) || (item.r30 === todayStr && !item.d30) || (item.rc === todayStr && !item.dc)) pending++; }); if (pending > 0) { playAlarmSound(); sendNotif("🧠 Revision Pending", `Aaj tumhare ${pending} topics ka revision bacha hai!`); } lastCheckedDate = todayStr; } }, 10000); 
+        })();
+
+        // ================= APP 5: SYLLABUS TRACKER =================
+        (function initSyllabus() {
+            const syllList = document.getElementById('syll-list');
+            const syllAddBtn = document.getElementById('syll-add-btn');
+            
+            function renderSyllabus() {
+                let data = JSON.parse(localStorage.getItem('syll_data') || '[]');
+                syllList.innerHTML = data.map((item, i) => {
+                    let subsHtml = '';
+                    if(item.subs && item.subs.length > 0) {
+                        subsHtml = '<div style="margin-top:10px; display:flex; flex-direction:column; gap:6px;">' + 
+                        item.subs.map((sub, sIdx) => {
+                            let text = typeof sub === 'string' ? sub : sub.text;
+                            let isDone = typeof sub === 'string' ? false : sub.done;
+                            let textStyle = isDone ? 'text-decoration:line-through; color:var(--text-muted);' : 'color:var(--text-main);';
+                            return `
+                            <div style="display:flex; align-items:center; gap:8px; background:rgba(255,255,255,0.05); padding:8px; border-radius:8px; border:1px solid var(--border-color);">
+                                <input type="checkbox" ${isDone ? 'checked' : ''} onchange="toggleSubtask(${i}, ${sIdx})" style="width:16px; height:16px; accent-color:var(--success);">
+                                <span style="flex:1; font-size:13px; font-weight:600; ${textStyle}">${text}</span>
+                                <button onclick="deleteSubtask(${i}, ${sIdx})" style="background:rgba(255,59,48,0.1); border:none; color:var(--danger); width:24px; height:24px; border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center;">✖</button>
+                            </div>`;
+                        }).join('') + '</div>';
+                    }
+
+                    return `
+                    <div style="background:var(--bg-color); padding:15px; border-radius:12px; margin-bottom:12px; border:1px solid var(--border-color)">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                            <strong style="color:var(--primary); font-size:15px;">${item.topic}</strong>
+                            <button onclick="deleteSyll(${i})" style="background:rgba(255,59,48,0.1); border:none; color:var(--danger); width:28px; height:28px; border-radius:8px; cursor:pointer;">✖</button>
+                        </div>
+                        <div style="font-size:13px; font-weight:700; color:var(--text-muted); margin-bottom:12px; display:flex; align-items:center; gap:8px;">
+                            Completed: <input type="number" value="${item.done}" onchange="updateHours(${i}, this.value)" style="width:60px; background:var(--card-bg); border:1px solid var(--border-color); color:var(--text-main); padding:6px; border-radius:6px; outline:none; text-align:center;"> / ${item.total} Hrs
+                        </div>
+                        <input type="text" placeholder="+ Subtask likho aur Enter dabao..." onkeypress="if(event.key==='Enter' && this.value.trim()!=='') { addSubtask(${i}, this.value.trim()); this.value=''; }" style="width:100%; padding:12px; background:var(--card-bg); border:1px solid var(--border-color); border-radius:10px; color:var(--text-main); font-size:13px; outline:none;">
+                        ${subsHtml}
+                    </div>
+                `}).join('');
             }
-            document.getElementById('syll-add-btn').onclick = () => {
-                let tp = document.getElementById('syll-topic').value, hr = document.getElementById('syll-hours').value;
-                if(tp && hr) { let d = JSON.parse(localStorage.getItem('syll_data')||'[]'); d.push({topic:tp, total:hr, done:0, subs:[]}); localStorage.setItem('syll_data', JSON.stringify(d)); document.getElementById('syll-topic').value=''; rSyll(); }
+
+            syllAddBtn.onclick = () => {
+                let topic = document.getElementById('syll-topic').value.trim();
+                let total = document.getElementById('syll-hours').value.trim();
+                if(!topic || !total) return alert("Topic aur Total Hours bharo!");
+                let data = JSON.parse(localStorage.getItem('syll_data') || '[]');
+                data.push({topic, total, done: 0, subs: []});
+                localStorage.setItem('syll_data', JSON.stringify(data));
+                document.getElementById('syll-topic').value = '';
+                document.getElementById('syll-hours').value = '';
+                renderSyllabus();
             };
-            window.uSyllHrs = (i, v) => { let d = JSON.parse(localStorage.getItem('syll_data')); d[i].done=v; localStorage.setItem('syll_data', JSON.stringify(d)); };
-            window.aSyllSub = (i, v) => { let d = JSON.parse(localStorage.getItem('syll_data')); if(typeof d[i].subs[0]==='string') d[i].subs=d[i].subs.map(s=>({text:s, done:false})); d[i].subs.push({text:v, done:false}); localStorage.setItem('syll_data', JSON.stringify(d)); rSyll(); };
-            window.tSyllSub = (i, si) => { let d = JSON.parse(localStorage.getItem('syll_data')); if(typeof d[i].subs[si]==='string') d[i].subs[si]={text:d[i].subs[si], done:true}; else d[i].subs[si].done = !d[i].subs[si].done; localStorage.setItem('syll_data', JSON.stringify(d)); rSyll(); };
-            window.dSyllSub = (i, si) => { let d = JSON.parse(localStorage.getItem('syll_data')); d[i].subs.splice(si,1); localStorage.setItem('syll_data', JSON.stringify(d)); rSyll(); };
-            window.dSyll = (i) => { if(confirm('Delete Topic?')){ let d = JSON.parse(localStorage.getItem('syll_data')); d.splice(i,1); localStorage.setItem('syll_data', JSON.stringify(d)); rSyll(); } };
-            rSyll();
-        } catch(e) { console.log('Syllabus Error:', e); }
 
-        // ================= APP 4: TO-DO & NOTES =================
-        try {
-            let todos = JSON.parse(localStorage.getItem('todo_data'))||[];
-            function rTodo() { document.getElementById('todo-list-container').innerHTML = todos.map((t,i) => `<div class="list-item ${t.completed?'completed':''}"><div class="item-left" onclick="tTodo(${i})"><div class="custom-checkbox"></div><span class="item-text">${t.text}</span></div><button class="item-delete" onclick="dTodo(${i})">✖</button></div>`).join(''); }
-            document.getElementById('todo-add-btn').onclick = () => { let v = document.getElementById('todo-input').value.trim(); if(v){ todos.unshift({text:v, completed:false}); localStorage.setItem('todo_data', JSON.stringify(todos)); document.getElementById('todo-input').value=''; rTodo(); } };
-            window.tTodo = i => { todos[i].completed = !todos[i].completed; localStorage.setItem('todo_data', JSON.stringify(todos)); rTodo(); };
-            window.dTodo = i => { todos.splice(i,1); localStorage.setItem('todo_data', JSON.stringify(todos)); rTodo(); };
-            rTodo();
+            window.updateHours = (i, val) => {
+                let data = JSON.parse(localStorage.getItem('syll_data'));
+                data[i].done = val;
+                localStorage.setItem('syll_data', JSON.stringify(data));
+            };
 
-            let notes = JSON.parse(localStorage.getItem('quick_notes'))||[], eIdx = -1;
-            const nInp = document.getElementById('note-input'), nBtn = document.getElementById('note-add-btn');
-            function rNotes() { document.getElementById('notes-list-container').innerHTML = notes.map((n,i) => `<div class="note-card"><div class="note-text">${n.text}</div><div class="note-actions"><button onclick="eNote(${i})" style="background:var(--primary); border:none; color:white; padding:5px; border-radius:5px;">✏️</button><button onclick="dNote(${i})" style="background:var(--danger); border:none; color:white; padding:5px; border-radius:5px;">✖</button></div></div>`).join(''); }
-            nBtn.onclick = () => {
-                let v = nInp.innerHTML.trim();
-                if(v && v!=='<br>') {
-                    if(eIdx > -1) { notes[eIdx].text = v; eIdx = -1; nBtn.innerText = 'Save Note'; } else { notes.unshift({text:v}); }
-                    nInp.innerHTML = ''; localStorage.setItem('quick_notes', JSON.stringify(notes)); rNotes();
+            window.addSubtask = (i, val) => {
+                let data = JSON.parse(localStorage.getItem('syll_data'));
+                if (data[i].subs.length > 0 && typeof data[i].subs[0] === 'string') {
+                    data[i].subs = data[i].subs.map(s => ({text: s, done: false}));
+                }
+                data[i].subs.push({text: val, done: false});
+                localStorage.setItem('syll_data', JSON.stringify(data));
+                renderSyllabus();
+            };
+
+            window.toggleSubtask = (i, sIdx) => {
+                let data = JSON.parse(localStorage.getItem('syll_data'));
+                if(typeof data[i].subs[sIdx] === 'string') {
+                    data[i].subs[sIdx] = {text: data[i].subs[sIdx], done: true};
+                } else {
+                    data[i].subs[sIdx].done = !data[i].subs[sIdx].done;
+                }
+                localStorage.setItem('syll_data', JSON.stringify(data));
+                renderSyllabus();
+            };
+
+            window.deleteSubtask = (i, sIdx) => {
+                if(confirm("Subtask delete karein?")) {
+                    let data = JSON.parse(localStorage.getItem('syll_data'));
+                    data[i].subs.splice(sIdx, 1);
+                    localStorage.setItem('syll_data', JSON.stringify(data));
+                    renderSyllabus();
                 }
             };
-            window.eNote = i => { nInp.innerHTML = notes[i].text; eIdx=i; nBtn.innerText='Update Note'; window.scrollTo(0, nInp.offsetTop); };
-            window.dNote = i => { if(confirm('Delete Note?')){ if(eIdx===i){ eIdx=-1; nBtn.innerText='Save Note'; nInp.innerHTML=''; } notes.splice(i,1); localStorage.setItem('quick_notes', JSON.stringify(notes)); rNotes(); } };
-            rNotes();
-        } catch(e) { console.log('Todo/Notes Error:', e); }
 
-        // ================= APP 5: REVISION =================
-        try {
-            function rSrs() {
-                let d = JSON.parse(localStorage.getItem('srs_data_v2')||'[]');
-                document.getElementById('srs-list-container').innerHTML = d.map((itm, i) => `<div class="card" style="padding:15px; margin-bottom:10px;"><div style="display:flex; justify-content:space-between; margin-bottom:10px;"><strong style="color:var(--primary)">${itm.topic}</strong><button onclick="dSrs(${i})" style="background:none;border:none;color:red;">✖</button></div></div>`).join('');
-            }
-            document.getElementById('srs-add-btn').onclick = () => {
-                let t = document.getElementById('srs-input').value, c = document.getElementById('srs-custom-date').value;
-                if(t && c) { let d = JSON.parse(localStorage.getItem('srs_data_v2')||'[]'); d.unshift({topic:t, rc:c}); localStorage.setItem('srs_data_v2', JSON.stringify(d)); rSrs(); }
+            window.deleteSyll = (i) => {
+                if(confirm("Poora Topic delete karein?")) {
+                    let data = JSON.parse(localStorage.getItem('syll_data'));
+                    data.splice(i, 1);
+                    localStorage.setItem('syll_data', JSON.stringify(data));
+                    renderSyllabus();
+                }
             };
-            window.dSrs = i => { let d = JSON.parse(localStorage.getItem('srs_data_v2')); d.splice(i,1); localStorage.setItem('srs_data_v2', JSON.stringify(d)); rSrs(); };
-            rSrs();
-        } catch(e) { console.log('SRS Error:', e); }
+            
+            renderSyllabus();
+        })();
 
-        // ================= CLOUD SYNC =================
-        try {
-            document.getElementById('cloud-save-btn').onclick = async function() {
-                let id = document.getElementById('kvdb-bucket-id').value.trim(); if(!id) return alert("Enter Bucket ID!");
-                localStorage.setItem('kvdb_bucket_id', id);
-                let data = {
+        // ================= TEXT BACKUP & RESTORE =================
+        (function initTextBackup() {
+            const copyBtn = document.getElementById('backup-copy-btn');
+            const pasteBtn = document.getElementById('backup-paste-btn');
+            const textArea = document.getElementById('backup-textarea');
+            const confirmBtn = document.getElementById('backup-confirm-btn');
+
+            copyBtn.onclick = () => {
+                const appData = { wpk_tags: localStorage.getItem('wpk_tags'), wpk_schedule: localStorage.getItem('wpk_schedule'), tt_data: localStorage.getItem('tt_data'), todo_data: localStorage.getItem('todo_data'), quick_notes: localStorage.getItem('quick_notes'), srs_data_v2: localStorage.getItem('srs_data_v2'), syll_data: localStorage.getItem('syll_data') };
+                const dataStr = JSON.stringify(appData);
+                if (navigator.clipboard && window.isSecureContext) {
+                    navigator.clipboard.writeText(dataStr).then(() => { alert("✅ Backup Copy ho gaya! Ise WhatsApp ya Note pad me safe paste kar lo."); }).catch(err => { showManualCopy(dataStr); });
+                } else { showManualCopy(dataStr); }
+            };
+
+            function showManualCopy(str) {
+                textArea.style.display = 'block'; textArea.value = str; textArea.select();
+                try { document.execCommand('copy'); alert("✅ Backup Copy ho gaya! Ise kisi safe jagah paste kar lo."); } 
+                catch (err) { alert("Copy nahi ho paya. Niche wale text box se manually poora text select karke copy karo."); }
+            }
+
+            pasteBtn.onclick = () => {
+                textArea.style.display = 'block'; confirmBtn.style.display = 'block'; textArea.value = ''; textArea.focus();
+                alert("Neeche khali box me apna purana backup text (code) paste karo aur 'Confirm Restore' dabao.");
+            };
+
+            confirmBtn.onclick = () => {
+                const rawData = textArea.value.trim();
+                if(!rawData) return alert("Pehle data paste karo!");
+                try {
+                    const parsedData = JSON.parse(rawData);
+                    if (parsedData.wpk_tags) localStorage.setItem('wpk_tags', parsedData.wpk_tags);
+                    if (parsedData.wpk_schedule) localStorage.setItem('wpk_schedule', parsedData.wpk_schedule);
+                    if (parsedData.tt_data) localStorage.setItem('tt_data', parsedData.tt_data);
+                    if (parsedData.todo_data) localStorage.setItem('todo_data', parsedData.todo_data);
+                    if (parsedData.quick_notes) localStorage.setItem('quick_notes', parsedData.quick_notes);
+                    if (parsedData.srs_data_v2) localStorage.setItem('srs_data_v2', parsedData.srs_data_v2);
+                    if (parsedData.syll_data) localStorage.setItem('syll_data', parsedData.syll_data);
+                    alert('Data successfully restored! App automatic restart ho raha hai.');
+                    window.location.reload();
+                } catch (err) { alert('Error: Yeh valid backup text nahi hai. Dhyan se poora text paste karo.'); }
+            };
+        })();
+
+        // ================= CLOUD SYNC FIXED + HARD FORCE RELOAD =================
+        (function initCloudSync() {
+            const bucketInput = document.getElementById('kvdb-bucket-id');
+            const saveBtn = document.getElementById('cloud-save-btn');
+            const loadBtn = document.getElementById('cloud-load-btn');
+            
+            const savedBucket = localStorage.getItem('kvdb_bucket_id');
+            if (savedBucket) bucketInput.value = savedBucket;
+
+            saveBtn.onclick = async () => {
+                const bucketId = bucketInput.value.trim();
+                if (!bucketId) return alert("Pehle KVDB ki Bucket ID daalo!");
+                localStorage.setItem('kvdb_bucket_id', bucketId);
+
+                const appData = {
                     wpk_tags: localStorage.getItem('wpk_tags'), wpk_schedule: localStorage.getItem('wpk_schedule'),
                     tt_data: localStorage.getItem('tt_data'), todo_data: localStorage.getItem('todo_data'),
-                    quick_notes: localStorage.getItem('quick_notes'), srs_data_v2: localStorage.getItem('srs_data_v2'), syll_data: localStorage.getItem('syll_data')
+                    quick_notes: localStorage.getItem('quick_notes'), srs_data_v2: localStorage.getItem('srs_data_v2'),
+                    syll_data: localStorage.getItem('syll_data')
                 };
-                this.innerText = "Saving...";
-                let res = await fetch(`https://kvdb.io/${id}/focusdata`, { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data) });
-                if(res.ok) alert("✅ Cloud Sync Success!"); else alert("❌ Error saving to cloud.");
-                this.innerText = "Save to Cloud";
+
+                try {
+                    saveBtn.innerText = "Saving...";
+                    const res = await fetch(`https://kvdb.io/${bucketId}/focusgrid_data`, { 
+                        method: 'PUT', 
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(appData) 
+                    });
+                    
+                    if (res.ok) {
+                        alert("✅ Data Cloud par save ho gaya!");
+                    } else { 
+                        const errText = await res.text();
+                        alert(`❌ Server Error (${res.status}): ${errText}`); 
+                    }
+                } catch(e) { 
+                    alert("❌ Network Error! Internet connection check karo."); 
+                }
+                saveBtn.innerText = "Save to Cloud";
             };
 
-            document.getElementById('cloud-load-btn').onclick = async function() {
-                let id = document.getElementById('kvdb-bucket-id').value.trim(); if(!id) return alert("Enter Bucket ID!");
-                localStorage.setItem('kvdb_bucket_id', id);
-                this.innerText = "Loading...";
-                let res = await fetch(`https://kvdb.io/${id}/focusdata?t=${Date.now()}`);
-                if(res.ok) {
-                    let d = await res.json();
-                    if(d.wpk_tags) localStorage.setItem('wpk_tags', d.wpk_tags);
-                    if(d.wpk_schedule) localStorage.setItem('wpk_schedule', d.wpk_schedule);
-                    if(d.tt_data) localStorage.setItem('tt_data', d.tt_data);
-                    if(d.todo_data) localStorage.setItem('todo_data', d.todo_data);
-                    if(d.quick_notes) localStorage.setItem('quick_notes', d.quick_notes);
-                    if(d.srs_data_v2) localStorage.setItem('srs_data_v2', d.srs_data_v2);
-                    if(d.syll_data) localStorage.setItem('syll_data', d.syll_data);
-                    alert("✅ Data Loaded! Restarting..."); window.location.reload();
-                } else { alert("❌ Error loading data."); }
-                this.innerText = "Load Data";
-            };
-            document.getElementById('kvdb-bucket-id').value = localStorage.getItem('kvdb_bucket_id') || '';
-        } catch(e) { console.log('Cloud Error:', e); }
+            loadBtn.onclick = async () => {
+                const bucketId = bucketInput.value.trim();
+                if (!bucketId) return alert("Pehle KVDB ki Bucket ID daalo!");
+                localStorage.setItem('kvdb_bucket_id', bucketId);
 
+                try {
+                    loadBtn.innerText = "Loading...";
+                    // Adding a timestamp query to bust browser cache
+                    const res = await fetch(`https://kvdb.io/${bucketId}/focusgrid_data?t=${Date.now()}`);
+                    if (res.ok) {
+                        const parsedData = await res.json();
+                        
+                        // Storage data drop execution
+                        localStorage.setItem('wpk_tags', parsedData.wpk_tags || '');
+                        localStorage.setItem('wpk_schedule', parsedData.wpk_schedule || '');
+                        localStorage.setItem('tt_data', parsedData.tt_data || '');
+                        localStorage.setItem('todo_data', parsedData.todo_data || '');
+                        localStorage.setItem('quick_notes', parsedData.quick_notes || '');
+                        localStorage.setItem('srs_data_v2', parsedData.srs_data_v2 || '');
+                        localStorage.setItem('syll_data', parsedData.syll_data || '[]');
+                        
+                        alert("✅ Data Cloud se load ho gaya! Naya data apply karne ke liye app automatic full restart ho raha hai.");
+                        
+                        // HARD FORCE RELOAD BYPASSING CACHE
+                        window.location.href = window.location.href.split('#')[0];
+                        window.location.reload();
+                    } else { 
+                        const errText = await res.text();
+                        alert(`❌ Load Error (${res.status}): ${errText}`); 
+                    }
+                } catch(e) { 
+                    alert("❌ Network Error! Internet connection check karo."); 
+                }
+                loadBtn.innerText = "Load from Cloud";
+            };
+        })();
     </script>
 </body>
 </html>
