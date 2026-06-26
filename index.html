@@ -6,7 +6,6 @@
     <meta name="theme-color" content="#0b0e20">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>FocusGrid Planner</title>
     <style>
         /* ================= VIVID ACADEMY DARK THEME ================= */
@@ -23,7 +22,7 @@
         .app-view { display: none; padding: 15px; width: 100%; min-height: calc(100vh - 80px); animation: fadeIn 0.3s ease; }
         .app-view.active { display: block; }
 
-        /* ================= FLOATING BOTTOM NAV (4 TABS) ================= */
+        /* ================= FLOATING BOTTOM NAV ================= */
         .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 65px; background: rgba(11, 14, 32, 0.95); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-top: 1px solid var(--border-color); display: flex; justify-content: space-around; align-items: center; z-index: 1000; padding: 0 5px; }
         .nav-btn { flex: 1; border: none; background: transparent; font-size: 11px; font-weight: 700; color: var(--text-muted); cursor: pointer; transition: 0.3s; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 0; text-transform: uppercase; letter-spacing: 0.5px; }
         .nav-btn span { font-size: 18px; filter: grayscale(100%) opacity(0.5); transition: 0.3s; }
@@ -120,6 +119,7 @@
         .list-item.completed .custom-checkbox::after { opacity: 1; }
         .item-text { font-size: 15px; font-weight: 600; color: var(--text-main); word-wrap: break-word; flex: 1; transition: 0.2s; margin-top: 2px;}
         .item-delete { background: rgba(255,59,48,0.1); border: none; color: var(--danger); width: 34px; height: 34px; border-radius: 10px; cursor: pointer; flex-shrink: 0; transition: 0.2s; display: flex; align-items: center; justify-content: center; }
+        .item-delete:active { transform: scale(0.9); background: var(--danger); color: #fff; }
 
         /* Quick Notes Visual Editor Grid */
         .btn-tool { padding: 8px 12px; background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: bold; white-space: nowrap; transition: 0.1s;}
@@ -133,7 +133,7 @@
 
         .notes-grid { display: grid; gap: 12px; grid-template-columns: 1fr; margin-top: 15px; }
         .note-card { background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; position: relative; }
-        .note-text { font-size: 14px; color: var(--text-main); white-space: pre-wrap; line-height: 1.5; margin-right: 70px; word-wrap: break-word;}
+        .note-text { font-size: 14px; color: var(--text-main); line-height: 1.5; margin-right: 70px; word-wrap: break-word;}
         .note-date { font-size: 11px; color: var(--text-muted); margin-top: 10px; }
         .note-actions { position: absolute; top: 12px; right: 12px; display: flex; gap: 8px; }
         .note-action-btn { width: 28px; height: 28px; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; transition: 0.2s; }
@@ -146,6 +146,10 @@
     </style>
 </head>
 <body>
+
+    <script>
+        window.kvdb_id = localStorage.getItem('kvdb_bucket_id') || '';
+    </script>
 
     <div id="view-planner" class="app-view active">
         <div class="card">
@@ -238,9 +242,9 @@
                 </div>
 
                 <div style="display:flex; justify-content:center; gap:8px; margin-bottom:15px; flex-wrap:wrap;">
-                    <button class="btn" style="background:rgba(42, 100, 246, 0.2); color:var(--primary); padding:8px 12px; font-size:12px;" onclick="ttSetSession(30)">⏱ 30m Target</button>
-                    <button class="btn" style="background:rgba(42, 100, 246, 0.2); color:var(--primary); padding:8px 12px; font-size:12px;" onclick="ttSetSession(45)">⏱ 45m Target</button>
-                    <button class="btn" style="background:rgba(42, 100, 246, 0.2); color:var(--primary); padding:8px 12px; font-size:12px;" onclick="ttSetSession(60)">⏱ 60m Target</button>
+                    <button class="btn" style="background:rgba(42, 100, 246, 0.2); color:var(--primary); padding:8px 12px; font-size:12px;" onclick="ttSetSession(30)">⏱ 30m</button>
+                    <button class="btn" style="background:rgba(42, 100, 246, 0.2); color:var(--primary); padding:8px 12px; font-size:12px;" onclick="ttSetSession(45)">⏱ 45m</button>
+                    <button class="btn" style="background:rgba(42, 100, 246, 0.2); color:var(--primary); padding:8px 12px; font-size:12px;" onclick="ttSetSession(60)">⏱ 60m</button>
                 </div>
 
                 <div class="tt-controls">
@@ -311,7 +315,7 @@
     <div id="view-srs" class="app-view">
         <div class="card">
             <div class="header-action" style="border-bottom: 1px solid var(--border-color); padding-bottom: 15px;">
-                <h3 class="card-title" style="margin:0;">🧠 Revision (4-10-30-Custom)</h3>
+                <h3 class="card-title" style="margin:0;">🧠 Revision Tracker</h3>
                 <button class="btn btn-reset" id="srs-clear-all" style="padding: 6px 12px; font-size: 11px;">Clear All</button>
             </div>
             <div class="input-group">
@@ -323,7 +327,7 @@
         </div>
     </div>
 
-    <div class="modal-overlay" id="wpk-modal"><div class="modal"><h3 id="wpk-modalTitle" style="margin-top:0; margin-bottom: 20px; text-align:center; font-size: 1.1rem; color:var(--text-main); text-transform:uppercase; letter-spacing:1px;">Edit Data</h3><input type="text" id="wpk-cellTask" placeholder="Task description..."><select id="wpk-cellTag"></select><button class="btn btn-save" id="wpk-saveBtn">Save</button><button class="btn btn-clear" id="wpk-clearBtn">Clear Cell(s)</button><button class="btn btn-close" id="wpk-closeBtn">Cancel</button></div></div>
+    <div class="modal-overlay" id="wpk-modal"><div class="modal"><h3 id="wpk-modalTitle" style="margin-top:0; text-align:center;">Edit Data</h3><input type="text" id="wpk-cellTask" placeholder="Task..."><select id="wpk-cellTag"></select><button class="btn btn-save" id="wpk-saveBtn">Save</button><button class="btn btn-clear" id="wpk-clearBtn">Clear Cell(s)</button><button class="btn btn-close" id="wpk-closeBtn">Cancel</button></div></div>
 
     <nav class="bottom-nav">
         <button class="nav-btn active" onclick="switchTab('planner', this)"><span>📅</span> Planner</button>
@@ -333,7 +337,7 @@
     </nav>
 
     <script>
-        // ================= TAB SWITCHING =================
+        // ================= GENERAL CONTROLLER =================
         function switchTab(tab, btnElement) {
             document.querySelectorAll('.app-view').forEach(v => v.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -342,38 +346,36 @@
             window.scrollTo(0,0);
         }
 
-        // ================= HELPER FUNCTIONS =================
         function getTodayStr() { let d = new Date(); return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,'0') + "-" + String(d.getDate()).padStart(2,'0'); }
-        
+
+        function safeParse(key, fallback) {
+            try { let item = localStorage.getItem(key); if(!item || item.trim() === "") return fallback; return JSON.parse(item); } 
+            catch(e) { console.error("Malformed storage:", key); return fallback; }
+        }
+
         function playAlarmSound() {
             try {
                 let ctx = new (window.AudioContext || window.webkitAudioContext)();
                 for(let i=0; i<6; i++) {
-                    let osc = ctx.createOscillator(); 
-                    let gain = ctx.createGain();
+                    let osc = ctx.createOscillator(); let gain = ctx.createGain();
                     osc.connect(gain); gain.connect(ctx.destination);
-                    osc.type = 'square'; 
-                    osc.frequency.setValueAtTime(800, ctx.currentTime + i*0.4);
-                    osc.frequency.setValueAtTime(1200, ctx.currentTime + i*0.4 + 0.2);
-                    gain.gain.setValueAtTime(1, ctx.currentTime + i*0.4);
-                    gain.gain.setTargetAtTime(0.001, ctx.currentTime + i*0.4 + 0.3, 0.05);
-                    osc.start(ctx.currentTime + i*0.4); 
-                    osc.stop(ctx.currentTime + i*0.4 + 0.35);
+                    osc.type = 'square'; osc.frequency.setValueAtTime(800, ctx.currentTime + i*0.4); osc.frequency.setValueAtTime(1200, ctx.currentTime + i*0.4 + 0.2);
+                    gain.gain.setValueAtTime(1, ctx.currentTime + i*0.4); gain.gain.setTargetAtTime(0.001, ctx.currentTime + i*0.4 + 0.3, 0.05);
+                    osc.start(ctx.currentTime + i*0.4); osc.stop(ctx.currentTime + i*0.4 + 0.35);
                 }
             } catch(e) {}
         }
 
-        function requestNotifPerm() { if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") { Notification.requestPermission(); } }
-        function sendNotif(title, msg) { if ("Notification" in window && Notification.permission === "granted") { new Notification(title, { body: msg, requireInteraction: true }); } }
+        function requestNotifPerm() { if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") Notification.requestPermission(); }
+        function sendNotif(title, msg) { if ("Notification" in window && Notification.permission === "granted") new Notification(title, { body: msg, requireInteraction: true }); }
 
         // ================= APP 1: PLANNER =================
         (function initPlanner() {
             const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
             const defaultTags = { 't1': { name: 'Focus', color: '#2a64f6' }, 't2': { name: 'Break', color: '#ff3b30' }};
-            let tags = JSON.parse(localStorage.getItem('wpk_tags')) || defaultTags;
-            let schedule = JSON.parse(localStorage.getItem('wpk_schedule')) || {};
-            
-            let currentCellId = null; let isBulkMode = false; let selectedCells = [];
+            let tags = safeParse('wpk_tags', defaultTags);
+            let schedule = safeParse('wpk_schedule', {});
+            let isBulkMode = false, selectedCells = [];
 
             const tHead = document.getElementById('wpk-tableHeader'), tBody = document.getElementById('wpk-tableBody');
             const tagsCont = document.getElementById('wpk-tagsContainer'), cellSelect = document.getElementById('wpk-cellTag'), modal = document.getElementById('wpk-modal');
@@ -393,7 +395,7 @@
                     else { selectedCells.push(id); el.classList.add('bulk-selected'); }
                     updateBulkUI();
                 } else {
-                    currentCellId = id; document.getElementById('wpk-modalTitle').innerText = `${day} • ${time}`;
+                    window.currentCellId = id; document.getElementById('wpk-modalTitle').innerText = `${day} • ${time}`;
                     let data = schedule[id] || {task:'', tagId:''};
                     document.getElementById('wpk-cellTask').value = data.task; document.getElementById('wpk-cellTag').value = data.tagId;
                     selectedCells = [id]; modal.style.display = 'flex';
@@ -453,9 +455,9 @@
             }, 10000);
         })();
 
-        // ================= APP 2: TIMER =================
+        // ================= APP 2: TIMER (FULLY RESTORED) =================
         (function initTimer() {
-            let ttData = JSON.parse(localStorage.getItem('tt_data')) || { total: -1, remaining: -1, logs: {} };
+            let ttData = safeParse('tt_data', { total: -1, remaining: -1, logs: {} });
             let timerInterval = null, isRunning = false, sessionSeconds = 0, initialSessionRemaining = 0, startTime = 0;
             let sessionLimitSec = 0; let breakInterval = null; let breakSec = 0;
 
@@ -481,8 +483,10 @@
 
             document.getElementById('tt-btn-set-target').onclick = () => { let hrs = parseFloat(document.getElementById('tt-target-hours').value); if(hrs > 0) { let s = Math.floor(hrs * 3600); ttData.total = s; ttData.remaining = s; saveTT(); updateUI(); } else alert('Invalid time'); };
             
+            // Restored Logic for 30m, 45m, 60m Sessions
             window.ttSetSession = (mins) => { if(ttData.remaining <= 0) return alert("Pehle Total Target set karo!"); sessionLimitSec = mins * 60; if(sessionLimitSec > ttData.remaining) sessionLimitSec = ttData.remaining; if(!isRunning) btnStart.click(); };
 
+            // Restored Logic for Break Timer
             window.ttStartBreak = (mins) => {
                 requestNotifPerm(); if(isRunning) btnPause.click(); 
                 clearInterval(breakInterval); breakSec = mins * 60; breakDisplayWrap.style.display = 'block';
@@ -514,9 +518,9 @@
             updateUI();
         })();
 
-        // ================= APP 3: TO-DO & NOTES (VISUAL EDITOR) =================
+        // ================= APP 3: TO-DO & VISUAL NOTES =================
         (function initTodo() {
-            let todos = JSON.parse(localStorage.getItem('todo_data')) || [];
+            let todos = safeParse('todo_data', []);
             const listContainer = document.getElementById('todo-list-container'), inputField = document.getElementById('todo-input'), addBtn = document.getElementById('todo-add-btn');
             function renderTodos() { listContainer.innerHTML = ''; if(todos.length === 0) { listContainer.innerHTML = '<p style="text-align:center; color:var(--text-muted); margin-top:20px; font-size:13px;">No tasks available.</p>'; return; } todos.forEach((todo, index) => { listContainer.innerHTML += `<div class="list-item ${todo.completed ? 'completed' : ''}"><div class="item-left" onclick="toggleTodo(${index})"><div class="custom-checkbox"></div><span class="item-text">${todo.text}</span></div><button class="item-delete" onclick="deleteTodo(${index})">✖</button></div>`; }); }
             addBtn.onclick = () => { if(inputField.value.trim()) { todos.unshift({ text: inputField.value.trim(), completed: false }); inputField.value = ''; localStorage.setItem('todo_data', JSON.stringify(todos)); renderTodos(); } };
@@ -526,75 +530,31 @@
             document.getElementById('todo-clear-all').onclick = () => { if(todos.length && confirm('Clear All Tasks?')) { todos = []; localStorage.setItem('todo_data', JSON.stringify(todos)); renderTodos(); } };
             renderTodos();
 
-            let notes = JSON.parse(localStorage.getItem('quick_notes')) || []; let editingNoteIndex = -1; 
+            let notes = safeParse('quick_notes', []); let editingNoteIndex = -1; 
             const notesContainer = document.getElementById('notes-list-container'), noteInput = document.getElementById('note-input'), noteAddBtn = document.getElementById('note-add-btn');
             function renderNotes() { notesContainer.innerHTML = ''; if(notes.length === 0) { notesContainer.innerHTML = '<p style="text-align:center; color:var(--text-muted); font-size:13px;">No notes saved.</p>'; return; } notes.forEach((note, index) => { notesContainer.innerHTML += `<div class="note-card"><div class="note-text">${note.text}</div><div class="note-date">${note.date}</div><div class="note-actions"><button class="note-action-btn btn-edit-note" onclick="editNote(${index})">✏️</button><button class="note-action-btn btn-del-note" onclick="deleteNote(${index})">✖</button></div></div>`; }); }
             
             noteAddBtn.onclick = () => { 
                 let text = noteInput.innerHTML.trim(); 
                 if(text && text !== '<br>') { 
-                    let d = new Date(); 
-                    let dateStr = `${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')} • ${d.getHours()}:${d.getMinutes().toString().padStart(2,'0')}`; 
-                    if(editingNoteIndex > -1) { 
-                        notes[editingNoteIndex].text = text; 
-                        notes[editingNoteIndex].date = dateStr + " (Edited)"; 
-                        editingNoteIndex = -1; 
-                        noteAddBtn.innerText = 'Save Note'; 
-                    } else { 
-                        notes.unshift({ text: text, date: dateStr }); 
-                    } 
-                    noteInput.innerHTML = ''; 
-                    localStorage.setItem('quick_notes', JSON.stringify(notes)); 
-                    renderNotes(); 
+                    let d = new Date(); let dateStr = `${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')} • ${d.getHours()}:${d.getMinutes().toString().padStart(2,'0')}`; 
+                    if(editingNoteIndex > -1) { notes[editingNoteIndex].text = text; notes[editingNoteIndex].date = dateStr + " (Edited)"; editingNoteIndex = -1; noteAddBtn.innerText = 'Save Note'; } 
+                    else { notes.unshift({ text: text, date: dateStr }); } 
+                    noteInput.innerHTML = ''; localStorage.setItem('quick_notes', JSON.stringify(notes)); renderNotes(); 
                 } 
             };
-            
-            window.editNote = i => { 
-                noteInput.innerHTML = notes[i].text; 
-                editingNoteIndex = i; 
-                noteAddBtn.innerText = 'Update Note'; 
-                noteInput.focus(); 
-                window.scrollTo({ top: noteInput.offsetTop - 50, behavior: 'smooth' }); 
-            };
-            
-            window.deleteNote = i => { 
-                if(confirm('Delete note?')) { 
-                    if(editingNoteIndex === i) { 
-                        editingNoteIndex = -1; 
-                        noteAddBtn.innerText = 'Save Note'; 
-                        noteInput.innerHTML = ''; 
-                    } 
-                    notes.splice(i, 1); 
-                    localStorage.setItem('quick_notes', JSON.stringify(notes)); 
-                    renderNotes(); 
-                } 
-            };
+            window.editNote = i => { noteInput.innerHTML = notes[i].text; editingNoteIndex = i; noteAddBtn.innerText = 'Update Note'; noteInput.focus(); window.scrollTo({ top: noteInput.offsetTop - 50, behavior: 'smooth' }); };
+            window.deleteNote = i => { if(confirm('Delete note?')) { if(editingNoteIndex === i) { editingNoteIndex = -1; noteAddBtn.innerText = 'Save Note'; noteInput.innerHTML = ''; } notes.splice(i, 1); localStorage.setItem('quick_notes', JSON.stringify(notes)); renderNotes(); } };
             renderNotes();
         })();
 
-        // ================= APP 4: REVISION TRACKER =================
-        (function initSRS() {
-            let srsData = JSON.parse(localStorage.getItem('srs_data_v2')) || [];
-            const listContainer = document.getElementById('srs-list-container'), inputField = document.getElementById('srs-input'), customDateInput = document.getElementById('srs-custom-date'), addBtn = document.getElementById('srs-add-btn');
-            function formatDate(dStr) { let d = new Date(dStr); return `${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')}`; }
-            function renderSRS() { listContainer.innerHTML = ''; if(srsData.length === 0) { listContainer.innerHTML = '<p style="text-align:center; color:var(--text-muted); margin-top:20px; font-size:13px;">No topics added yet.</p>'; return; } let todayStr = getTodayStr(); srsData.forEach((item, index) => { let html = `<div class="card" style="padding: 15px; margin-bottom: 0; background: rgba(255,255,255,0.02);"><div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;"><strong style="color:var(--primary); font-size: 15px;">${item.topic}</strong><button class="item-delete" style="width:28px; height:28px; font-size: 12px;" onclick="srsDelete(${index})">✖</button></div><div class="srs-grid">`; let revs = [ { label: '+4 Din', date: item.r4, done: item.d4, key: 'd4' }, { label: '+10 Din', date: item.r10, done: item.d10, key: 'd10' }, { label: '+30 Din', date: item.r30, done: item.d30, key: 'd30' }, { label: 'Custom', date: item.rc, done: item.dc, key: 'dc' } ]; revs.forEach((r) => { let isPastOrToday = new Date(r.date) <= new Date(todayStr); let bg = r.done ? 'rgba(0, 208, 132, 0.1)' : (isPastOrToday ? 'rgba(255,59,48,0.1)' : 'transparent'); let color = r.done ? 'var(--success)' : (isPastOrToday && !r.done ? 'var(--danger)' : 'var(--text-muted)'); let border = r.done ? 'var(--success)' : (isPastOrToday ? 'var(--danger)' : 'var(--border-color)'); html += `<div class="srs-box" onclick="srsToggle(${index}, '${r.key}')" style="border-color: ${border}; background: ${bg};"><div style="font-size: 10px; text-transform: uppercase; color: ${color}; font-weight: bold; margin-bottom: 3px;">${r.label}</div><div style="font-size: 13px; color: ${color}; font-weight: 700;">${formatDate(r.date)}</div></div>`; }); html += `</div></div>`; listContainer.innerHTML += html; }); }
-            addBtn.onclick = () => { let topic = inputField.value.trim(); let customDate = customDateInput.value; if(!topic) return alert('Topic ka naam likho!'); if(!customDate) return alert('4th revision ke liye custom date select karo!'); requestNotifPerm(); let today = new Date(); function addDays(d, days) { let res = new Date(d); res.setDate(res.getDate() + days); return res.getFullYear() + "-" + String(res.getMonth()+1).padStart(2,'0') + "-" + String(res.getDate()).padStart(2,'0'); } srsData.unshift({ topic: topic, added: getTodayStr(), r4: addDays(today, 4), d4: false, r10: addDays(today, 10), d10: false, r30: addDays(today, 30), d30: false, rc: customDate, dc: false }); inputField.value = ''; customDateInput.value = ''; localStorage.setItem('srs_data_v2', JSON.stringify(srsData)); renderSRS(); };
-            window.srsToggle = (i, key) => { srsData[i][key] = !srsData[i][key]; localStorage.setItem('srs_data_v2', JSON.stringify(srsData)); renderSRS(); };
-            window.srsDelete = i => { if(confirm('Delete topic?')) { srsData.splice(i, 1); localStorage.setItem('srs_data_v2', JSON.stringify(srsData)); renderSRS(); } };
-            document.getElementById('srs-clear-all').onclick = () => { if(srsData.length && confirm('Clear All Data?')) { srsData = []; localStorage.setItem('srs_data_v2', JSON.stringify(srsData)); renderSRS(); } };
-            renderSRS();
-
-            let lastCheckedDate = "";
-            setInterval(() => { let todayStr = getTodayStr(); if (todayStr !== lastCheckedDate) { let pending = 0; srsData.forEach(item => { if ((item.r4 === todayStr && !item.d4) || (item.r10 === todayStr && !item.d10) || (item.r30 === todayStr && !item.d30) || (item.rc === todayStr && !item.dc)) pending++; }); if (pending > 0) { playAlarmSound(); sendNotif("🧠 Revision Pending", `Aaj tumhare ${pending} topics ka revision bacha hai!`); } lastCheckedDate = todayStr; } }, 10000); 
-        })();
-
-        // ================= APP 5: SYLLABUS TRACKER =================
+        // ================= APP 4: SYLLABUS TRACKER =================
         (function initSyllabus() {
             const syllList = document.getElementById('syll-list');
             const syllAddBtn = document.getElementById('syll-add-btn');
             
             function renderSyllabus() {
-                let data = JSON.parse(localStorage.getItem('syll_data') || '[]');
+                let data = safeParse('syll_data', []);
                 syllList.innerHTML = data.map((item, i) => {
                     let subsHtml = '';
                     if(item.subs && item.subs.length > 0) {
@@ -631,7 +591,7 @@
                 let topic = document.getElementById('syll-topic').value.trim();
                 let total = document.getElementById('syll-hours').value.trim();
                 if(!topic || !total) return alert("Topic aur Total Hours bharo!");
-                let data = JSON.parse(localStorage.getItem('syll_data') || '[]');
+                let data = safeParse('syll_data', []);
                 data.push({topic, total, done: 0, subs: []});
                 localStorage.setItem('syll_data', JSON.stringify(data));
                 document.getElementById('syll-topic').value = '';
@@ -639,52 +599,38 @@
                 renderSyllabus();
             };
 
-            window.updateHours = (i, val) => {
-                let data = JSON.parse(localStorage.getItem('syll_data'));
-                data[i].done = val;
-                localStorage.setItem('syll_data', JSON.stringify(data));
-            };
-
+            window.updateHours = (i, val) => { let data = safeParse('syll_data', []); data[i].done = val; localStorage.setItem('syll_data', JSON.stringify(data)); };
             window.addSubtask = (i, val) => {
-                let data = JSON.parse(localStorage.getItem('syll_data'));
-                if (data[i].subs.length > 0 && typeof data[i].subs[0] === 'string') {
-                    data[i].subs = data[i].subs.map(s => ({text: s, done: false}));
-                }
+                let data = safeParse('syll_data', []);
+                if (data[i].subs.length > 0 && typeof data[i].subs[0] === 'string') data[i].subs = data[i].subs.map(s => ({text: s, done: false}));
                 data[i].subs.push({text: val, done: false});
-                localStorage.setItem('syll_data', JSON.stringify(data));
-                renderSyllabus();
+                localStorage.setItem('syll_data', JSON.stringify(data)); renderSyllabus();
             };
-
             window.toggleSubtask = (i, sIdx) => {
-                let data = JSON.parse(localStorage.getItem('syll_data'));
-                if(typeof data[i].subs[sIdx] === 'string') {
-                    data[i].subs[sIdx] = {text: data[i].subs[sIdx], done: true};
-                } else {
-                    data[i].subs[sIdx].done = !data[i].subs[sIdx].done;
-                }
-                localStorage.setItem('syll_data', JSON.stringify(data));
-                renderSyllabus();
+                let data = safeParse('syll_data', []);
+                if(typeof data[i].subs[sIdx] === 'string') data[i].subs[sIdx] = {text: data[i].subs[sIdx], done: true};
+                else data[i].subs[sIdx].done = !data[i].subs[sIdx].done;
+                localStorage.setItem('syll_data', JSON.stringify(data)); renderSyllabus();
             };
-
-            window.deleteSubtask = (i, sIdx) => {
-                if(confirm("Subtask delete karein?")) {
-                    let data = JSON.parse(localStorage.getItem('syll_data'));
-                    data[i].subs.splice(sIdx, 1);
-                    localStorage.setItem('syll_data', JSON.stringify(data));
-                    renderSyllabus();
-                }
-            };
-
-            window.deleteSyll = (i) => {
-                if(confirm("Poora Topic delete karein?")) {
-                    let data = JSON.parse(localStorage.getItem('syll_data'));
-                    data.splice(i, 1);
-                    localStorage.setItem('syll_data', JSON.stringify(data));
-                    renderSyllabus();
-                }
-            };
-            
+            window.deleteSubtask = (i, sIdx) => { if(confirm("Subtask delete karein?")) { let data = safeParse('syll_data', []); data[i].subs.splice(sIdx, 1); localStorage.setItem('syll_data', JSON.stringify(data)); renderSyllabus(); } };
+            window.deleteSyll = (i) => { if(confirm("Poora Topic delete karein?")) { let data = safeParse('syll_data', []); data.splice(i, 1); localStorage.setItem('syll_data', JSON.stringify(data)); renderSyllabus(); } };
             renderSyllabus();
+        })();
+
+        // ================= APP 5: REVISION TRACKER =================
+        (function initSRS() {
+            let srsData = safeParse('srs_data_v2', []);
+            const listContainer = document.getElementById('srs-list-container'), inputField = document.getElementById('srs-input'), customDateInput = document.getElementById('srs-custom-date'), addBtn = document.getElementById('srs-add-btn');
+            function formatDate(dStr) { let d = new Date(dStr); return `${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')}`; }
+            function renderSRS() { listContainer.innerHTML = ''; if(srsData.length === 0) { listContainer.innerHTML = '<p style="text-align:center; color:var(--text-muted); margin-top:20px; font-size:13px;">No topics added yet.</p>'; return; } let todayStr = getTodayStr(); srsData.forEach((item, index) => { let html = `<div class="card" style="padding: 15px; margin-bottom: 0; background: rgba(255,255,255,0.02);"><div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;"><strong style="color:var(--primary); font-size: 15px;">${item.topic}</strong><button class="item-delete" style="width:28px; height:28px; font-size: 12px;" onclick="srsDelete(${index})">✖</button></div><div class="srs-grid">`; let revs = [ { label: '+4 Din', date: item.r4, done: item.d4, key: 'd4' }, { label: '+10 Din', date: item.r10, done: item.d10, key: 'd10' }, { label: '+30 Din', date: item.r30, done: item.d30, key: 'd30' }, { label: 'Custom', date: item.rc, done: item.dc, key: 'dc' } ]; revs.forEach((r) => { let isPastOrToday = new Date(r.date) <= new Date(todayStr); let bg = r.done ? 'rgba(0, 208, 132, 0.1)' : (isPastOrToday ? 'rgba(255,59,48,0.1)' : 'transparent'); let color = r.done ? 'var(--success)' : (isPastOrToday && !r.done ? 'var(--danger)' : 'var(--text-muted)'); let border = r.done ? 'var(--success)' : (isPastOrToday ? 'var(--danger)' : 'var(--border-color)'); html += `<div class="srs-box" onclick="srsToggle(${index}, '${r.key}')" style="border-color: ${border}; background: ${bg};"><div style="font-size: 10px; text-transform: uppercase; color: ${color}; font-weight: bold; margin-bottom: 3px;">${r.label}</div><div style="font-size: 13px; color: ${color}; font-weight: 700;">${formatDate(r.date)}</div></div>`; }); html += `</div></div>`; listContainer.innerHTML += html; }); }
+            addBtn.onclick = () => { let topic = inputField.value.trim(); let customDate = customDateInput.value; if(!topic) return alert('Topic ka naam likho!'); if(!customDate) return alert('4th revision ke liye custom date select karo!'); requestNotifPerm(); let today = new Date(); function addDays(d, days) { let res = new Date(d); res.setDate(res.getDate() + days); return res.getFullYear() + "-" + String(res.getMonth()+1).padStart(2,'0') + "-" + String(res.getDate()).padStart(2,'0'); } srsData.unshift({ topic: topic, added: getTodayStr(), r4: addDays(today, 4), d4: false, r10: addDays(today, 10), d10: false, r30: addDays(today, 30), d30: false, rc: customDate, dc: false }); inputField.value = ''; customDateInput.value = ''; localStorage.setItem('srs_data_v2', JSON.stringify(srsData)); renderSRS(); };
+            window.srsToggle = (i, key) => { srsData[i][key] = !srsData[i][key]; localStorage.setItem('srs_data_v2', JSON.stringify(srsData)); renderSRS(); };
+            window.srsDelete = i => { if(confirm('Delete topic?')) { srsData.splice(i, 1); localStorage.setItem('srs_data_v2', JSON.stringify(srsData)); renderSRS(); } };
+            document.getElementById('srs-clear-all').onclick = () => { if(srsData.length && confirm('Clear All Data?')) { srsData = []; localStorage.setItem('srs_data_v2', JSON.stringify(srsData)); renderSRS(); } };
+            renderSRS();
+
+            let lastCheckedDate = "";
+            setInterval(() => { let todayStr = getTodayStr(); if (todayStr !== lastCheckedDate) { let pending = 0; srsData.forEach(item => { if ((item.r4 === todayStr && !item.d4) || (item.r10 === todayStr && !item.d10) || (item.r30 === todayStr && !item.d30) || (item.rc === todayStr && !item.dc)) pending++; }); if (pending > 0) { playAlarmSound(); sendNotif("🧠 Revision Pending", `Aaj tumhare ${pending} topics ka revision bacha hai!`); } lastCheckedDate = todayStr; } }, 10000); 
         })();
 
         // ================= TEXT BACKUP & RESTORE =================
@@ -695,7 +641,7 @@
             const confirmBtn = document.getElementById('backup-confirm-btn');
 
             copyBtn.onclick = () => {
-                const appData = { wpk_tags: localStorage.getItem('wpk_tags'), wpk_schedule: localStorage.getItem('wpk_schedule'), tt_data: localStorage.getItem('tt_data'), todo_data: localStorage.getItem('todo_data'), quick_notes: localStorage.getItem('quick_notes'), srs_data_v2: localStorage.getItem('srs_data_v2'), syll_data: localStorage.getItem('syll_data') };
+                const appData = { wpk_tags: localStorage.getItem('wpk_tags') || '{}', wpk_schedule: localStorage.getItem('wpk_schedule') || '{}', tt_data: localStorage.getItem('tt_data') || '{}', todo_data: localStorage.getItem('todo_data') || '[]', quick_notes: localStorage.getItem('quick_notes') || '[]', srs_data_v2: localStorage.getItem('srs_data_v2') || '[]', syll_data: localStorage.getItem('syll_data') || '[]' };
                 const dataStr = JSON.stringify(appData);
                 if (navigator.clipboard && window.isSecureContext) {
                     navigator.clipboard.writeText(dataStr).then(() => { alert("✅ Backup Copy ho gaya! Ise WhatsApp ya Note pad me safe paste kar lo."); }).catch(err => { showManualCopy(dataStr); });
@@ -731,7 +677,7 @@
             };
         })();
 
-        // ================= CLOUD SYNC FIXED + HARD FORCE RELOAD =================
+        // ================= CLOUD SYNC FIXED =================
         (function initCloudSync() {
             const bucketInput = document.getElementById('kvdb-bucket-id');
             const saveBtn = document.getElementById('cloud-save-btn');
@@ -746,10 +692,10 @@
                 localStorage.setItem('kvdb_bucket_id', bucketId);
 
                 const appData = {
-                    wpk_tags: localStorage.getItem('wpk_tags'), wpk_schedule: localStorage.getItem('wpk_schedule'),
-                    tt_data: localStorage.getItem('tt_data'), todo_data: localStorage.getItem('todo_data'),
-                    quick_notes: localStorage.getItem('quick_notes'), srs_data_v2: localStorage.getItem('srs_data_v2'),
-                    syll_data: localStorage.getItem('syll_data')
+                    wpk_tags: localStorage.getItem('wpk_tags') || '{}', wpk_schedule: localStorage.getItem('wpk_schedule') || '{}',
+                    tt_data: localStorage.getItem('tt_data') || '{}', todo_data: localStorage.getItem('todo_data') || '[]',
+                    quick_notes: localStorage.getItem('quick_notes') || '[]', srs_data_v2: localStorage.getItem('srs_data_v2') || '[]',
+                    syll_data: localStorage.getItem('syll_data') || '[]'
                 };
 
                 try {
@@ -779,23 +725,20 @@
 
                 try {
                     loadBtn.innerText = "Loading...";
-                    // Adding a timestamp query to bust browser cache
                     const res = await fetch(`https://kvdb.io/${bucketId}/focusgrid_data?t=${Date.now()}`);
                     if (res.ok) {
                         const parsedData = await res.json();
                         
-                        // Storage data drop execution
-                        localStorage.setItem('wpk_tags', parsedData.wpk_tags || '');
-                        localStorage.setItem('wpk_schedule', parsedData.wpk_schedule || '');
-                        localStorage.setItem('tt_data', parsedData.tt_data || '');
-                        localStorage.setItem('todo_data', parsedData.todo_data || '');
-                        localStorage.setItem('quick_notes', parsedData.quick_notes || '');
-                        localStorage.setItem('srs_data_v2', parsedData.srs_data_v2 || '');
+                        localStorage.setItem('wpk_tags', parsedData.wpk_tags || '{}');
+                        localStorage.setItem('wpk_schedule', parsedData.wpk_schedule || '{}');
+                        localStorage.setItem('tt_data', parsedData.tt_data || '{}');
+                        localStorage.setItem('todo_data', parsedData.todo_data || '[]');
+                        localStorage.setItem('quick_notes', parsedData.quick_notes || '[]');
+                        localStorage.setItem('srs_data_v2', parsedData.srs_data_v2 || '[]');
                         localStorage.setItem('syll_data', parsedData.syll_data || '[]');
                         
                         alert("✅ Data Cloud se load ho gaya! Naya data apply karne ke liye app automatic full restart ho raha hai.");
                         
-                        // HARD FORCE RELOAD BYPASSING CACHE
                         window.location.href = window.location.href.split('#')[0];
                         window.location.reload();
                     } else { 
